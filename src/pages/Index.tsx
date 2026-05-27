@@ -1,19 +1,74 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import React, { useState } from 'react';
+import { ProjectProvider } from '../context/ProjectContext';
+import { Header } from '../components/Header';
+import { PeoplePanel } from '../components/PeoplePanel';
+import { GanttChart } from '../components/GanttChart';
+import { AddPersonModal } from '../components/AddPersonModal';
+import { TaskModal } from '../components/TaskModal';
+import { useProject } from '../context/ProjectContext';
+import { addDays } from '../hooks/useGanttCalculations';
 
-import { MadeWithDyad } from "@/components/made-with-dyad";
+function ProjectPlannerApp() {
+  const { state, addTask, updateTask, addPerson } = useProject();
+  const [isAddPersonOpen, setIsAddPersonOpen] = useState(false);
+  const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
+  const [newTaskDate, setNewTaskDate] = useState<string | null>(null);
 
-const Index = () => {
+  const handleAddTask = () => {
+    setNewTaskDate(null);
+    setIsAddTaskOpen(true);
+  };
+
+  const handleAddPerson = () => {
+    setIsAddPersonOpen(true);
+  };
+
+  const handleSaveTask = (taskData: any) => {
+    if (taskData.id) {
+      updateTask(taskData);
+    } else {
+      addTask(taskData);
+    }
+    setIsAddTaskOpen(false);
+    setNewTaskDate(null);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">
-          Start building your amazing project here!
-        </p>
+    <div className="h-screen flex flex-col bg-gray-100">
+      <Header onAddTask={handleAddTask} onAddPerson={handleAddPerson} />
+      
+      <div className="flex-1 flex overflow-hidden">
+        <PeoplePanel />
+        <GanttChart />
       </div>
-      <MadeWithDyad />
+
+      {/* Add Person Modal */}
+      <AddPersonModal
+        isOpen={isAddPersonOpen}
+        onClose={() => setIsAddPersonOpen(false)}
+      />
+
+      {/* Add Task Modal */}
+      <TaskModal
+        isOpen={isAddTaskOpen}
+        onClose={() => {
+          setIsAddTaskOpen(false);
+          setNewTaskDate(null);
+        }}
+        task={null}
+        defaultStartDate={newTaskDate}
+        onSave={handleSaveTask}
+        people={state.people}
+        allTasks={state.tasks}
+      />
     </div>
   );
-};
+}
 
-export default Index;
+export default function Index() {
+  return (
+    <ProjectProvider>
+      <ProjectPlannerApp />
+    </ProjectProvider>
+  );
+}
