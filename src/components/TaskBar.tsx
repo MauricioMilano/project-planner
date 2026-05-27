@@ -192,16 +192,9 @@ export function TaskBar({ task, person, projectStartDate, dayWidth, onUpdate, on
         onMouseDown={(e) => handleMouseDown(e, 'right')}
       />
 
-      {/* Tooltip - Portal to body to avoid overflow clipping */}
+      {/* Tooltip */}
       {showTooltip && (
-        <div
-          className="fixed z-[9999] px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-xl whitespace-nowrap pointer-events-none"
-          style={{
-            transform: 'translateX(-50%)',
-            bottom: 'calc(100% + 8px)',
-            left: '50%'
-          }}
-        >
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50 whitespace-nowrap">
           <div className="font-medium">{task.name}</div>
           <div className="text-gray-300 mt-1">
             {formatDate(task.startDate)} → {formatDate(endDate)}
@@ -214,7 +207,7 @@ export function TaskBar({ task, person, projectStartDate, dayWidth, onUpdate, on
               Assigned to {person.name}
             </div>
           )}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900" />
+          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
         </div>
       )}
     </div>
