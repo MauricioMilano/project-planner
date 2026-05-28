@@ -56,9 +56,10 @@ function SortableTaskRow({ task, index, onTaskClick }: SortableTaskRowProps) {
       startDate: task.startDate,
       duration: task.duration,
       assigneeId: task.assigneeId,
-      dependencies: [],
+      dependencies: task.dependencies || [],
       priority: task.priority,
-      status: 'todo',
+      status: task.status,
+      notes: task.notes || '',
     };
     addTask(duplicatedTask);
   };
