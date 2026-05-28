@@ -6,12 +6,18 @@ import { GanttHeader } from './GanttHeader';
 import { GanttRow } from './GanttRow';
 import { TaskModal } from './TaskModal';
 import { differenceInDays, addDays } from '../hooks/useGanttCalculations';
-import { Plus, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
+import { Plus, ChevronLeft, ChevronRight, GripVertical, MoreHorizontal, Copy, Edit2 } from 'lucide-react';
 import { Task } from '../types';
 import { useSettings } from './SettingsModal';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
 import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from './ui/dropdown-menu';
 
 const MIN_TASKS_VISIBLE = 10;
 
@@ -21,11 +27,10 @@ interface SortableTaskRowProps {
   projectStartDate: string;
   dayWidth: number;
   onTaskClick: (task: Task) => void;
-  onUpdate: (task: Task) => void;
 }
 
-function SortableTaskRow({ task, index, projectStartDate, dayWidth, onTaskClick }: SortableTaskRowProps) {
-  const { state } = useProject();
+function SortableTaskRow({ task, index, onTaskClick }: SortableTaskRowProps) {
+  const { addTask } = useProject();
   const { currentTheme } = useTheme();
   const colors = currentTheme.colors;
   
@@ -44,13 +49,25 @@ function SortableTaskRow({ task, index, projectStartDate, dayWidth, onTaskClick 
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const handleDuplicateTask = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const duplicatedTask: Omit<Task, 'id'> = {
+      name: `${task.name} (copy)`,
+      startDate: task.startDate,
+      duration: task.duration,
+      assigneeId: task.assigneeId,
+      dependencies: [],
+      priority: task.priority,
+      status: 'todo',
+    };
+    addTask(duplicatedTask);
+  };
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`h-12 flex items-center cursor-pointer hover:opacity-80 ${
-        index % 2 === 0 ? '' : ''
-      } ${isDragging ? 'z-50 shadow-lg' : ''}`}
+      className={`h-12 flex items-center cursor-pointer hover:opacity-80 ${isDragging ? 'z-50 shadow-lg' : ''}`}
     >
       <div
         {...attributes}
@@ -71,6 +88,32 @@ function SortableTaskRow({ task, index, projectStartDate, dayWidth, onTaskClick 
         >
           {task.name}
         </span>
+      </div>
+      <div className="pr-2" onClick={(e) => e.stopPropagation()}>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="p-1.5 rounded-md hover:bg-opacity-10 transition-colors"
+              style={{ color: colors.textSecondary }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <MoreHorizontal size={14} />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuItem onClick={(e) => {
+              e.stopPropagation();
+              onTaskClick(task);
+            }}>
+              <Edit2 className="mr-2 h-4 w-4" />
+              <span>Edit</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleDuplicateTask}>
+              <Copy className="mr-2 h-4 w-4" />
+              <span>Duplicate</span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
     </div>
   );
@@ -100,7 +143,6 @@ export function GanttChart() {
     })
   );
 
-  // Calculate project timeline
   const { projectStartDate, projectEndDate, totalDays } = useMemo(() => {
     if (state.tasks.length === 0) {
       const today = new Date();
@@ -272,7 +314,6 @@ export function GanttChart() {
             className="w-48 flex-shrink-0 flex flex-col"
             style={{ borderRight: `1px solid ${colors.border}` }}
           >
-            {/* Task name column header */}
             <div 
               className="h-12 flex items-center px-3"
               style={{ 
@@ -283,7 +324,6 @@ export function GanttChart() {
               <GripVertical size={14} className="mr-2" style={{ color: colors.textSecondary }} />
               <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: colors.textSecondary }}>{t('gantt.task')}</span>
             </div>
-            {/* Task rows */}
             <div className="flex-1 overflow-y-auto">
               {state.tasks.length === 0 ? (
                 <div className="h-20 flex items-center justify-center">
@@ -302,12 +342,10 @@ export function GanttChart() {
                       projectStartDate={projectStartDate}
                       dayWidth={dayWidth}
                       onTaskClick={handleTaskClick}
-                      onUpdate={updateTask}
                     />
                   ))}
                 </SortableContext>
               )}
-              {/* Empty rows to maintain alignment with timeline */}
               {state.tasks.length < MIN_TASKS_VISIBLE &&
                 Array.from({ length: MIN_TASKS_VISIBLE - state.tasks.length }).map((_, i) => (
                   <div
@@ -330,7 +368,6 @@ export function GanttChart() {
             onClick={handleEmptyClick}
           >
             <div style={{ width: totalDays * dayWidth, minWidth: '100%' }}>
-              {/* Month headers */}
               <div className="sticky top-0 z-10">
                 <GanttHeader
                   projectStartDate={projectStartDate}
@@ -339,7 +376,6 @@ export function GanttChart() {
                 />
               </div>
 
-              {/* Task rows */}
               <div className="relative" style={{ minHeight: Math.max(state.tasks.length, MIN_TASKS_VISIBLE) * 48 }}>
                 {state.tasks.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center">
