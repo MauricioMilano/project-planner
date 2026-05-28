@@ -49,6 +49,12 @@ function projectReducer(state: ProjectState, action: ProjectAction): ProjectStat
         ...state,
         tasks: state.tasks.filter(t => t.id !== action.payload),
       };
+    case 'REORDER_TASKS':
+      const { oldIndex, newIndex } = action.payload;
+      const newTasks = [...state.tasks];
+      const [removed] = newTasks.splice(oldIndex, 1);
+      newTasks.splice(newIndex, 0, removed);
+      return { ...state, tasks: newTasks };
     case 'LOAD_STATE':
       return action.payload;
     default:
@@ -65,6 +71,8 @@ interface ProjectContextType {
   addTask: (task: Omit<Task, 'id'>) => Task;
   updateTask: (task: Task) => void;
   deleteTask: (id: string) => void;
+  reorderTasks: (oldIndex: number, newIndex: number) => void;
+  getPersonById: (id: string | null) => Person | null;
   getAvatarColor: (name: string) => string;
 }
 
@@ -132,6 +140,15 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'DELETE_TASK', payload: id });
   }, []);
 
+  const reorderTasks = useCallback((oldIndex: number, newIndex: number) => {
+    dispatch({ type: 'REORDER_TASKS', payload: { oldIndex, newIndex } });
+  }, []);
+
+  const getPersonById = useCallback((id: string | null): Person | null => {
+    if (!id) return null;
+    return state.people.find(p => p.id === id) || null;
+  }, [state.people]);
+
   const value: ProjectContextType = {
     state,
     dispatch,
@@ -141,6 +158,8 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     addTask,
     updateTask,
     deleteTask,
+    reorderTasks,
+    getPersonById,
     getAvatarColor,
   };
 
