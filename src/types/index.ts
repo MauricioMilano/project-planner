@@ -30,4 +30,5 @@ export type ProjectAction =
   | { type: 'ADD_TASK'; payload: Task }
   | { type: 'UPDATE_TASK'; payload: Task }
   | { type: 'DELETE_TASK'; payload: string }
+  | { type: 'REORDER_TASKS'; payload: { oldIndex: number; newIndex: number } }
   | { type: 'LOAD_STATE'; payload: ProjectState };
