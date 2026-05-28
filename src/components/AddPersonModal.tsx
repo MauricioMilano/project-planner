@@ -56,7 +56,6 @@ export function AddPersonModal({ isOpen, onClose, editPerson }: AddPersonModalPr
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">
->>>>>>> REPLACE
             {editPerson ? 'Edit Team Member' : 'Add Team Member'}
           </h2>
           <button
