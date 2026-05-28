@@ -1,48 +1,23 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { ProjectProvider } from '../context/ProjectContext';
 import { Header } from '../components/Header';
 import { PeoplePanel } from '../components/PeoplePanel';
 import { GanttChart } from '../components/GanttChart';
 import { AddPersonModal } from '../components/AddPersonModal';
 import { TaskModal } from '../components/TaskModal';
-import { SettingsModal, useSettings } from '../components/SettingsModal';
-import { useProject } from '../context/ProjectContext';
-import { addDays } from '../hooks/useGanttCalculations';
+import { SettingsModal } from '../components/SettingsModal';
 
 function ProjectPlannerApp() {
-  const { state, addTask, updateTask, addPerson } = useProject();
   const [isAddPersonOpen, setIsAddPersonOpen] = useState(false);
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [newTaskDate, setNewTaskDate] = useState<string | null>(null);
-  useSettings();
-
-  const handleAddTask = () => {
-    setNewTaskDate(null);
-    setIsAddTaskOpen(true);
-  };
-
-  const handleAddPerson = () => {
-    setIsAddPersonOpen(true);
-  };
-
-  const handleSaveTask = (taskData: any) => {
-    if (taskData.id) {
-      updateTask(taskData);
-    } else {
-      addTask(taskData);
-    }
-    setIsAddTaskOpen(false);
-    setNewTaskDate(null);
-  };
 
   return (
     <div className="h-screen flex flex-col bg-gray-100">
       <Header 
-        onAddTask={handleAddTask} 
-        onAddPerson={handleAddPerson}
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
       
@@ -66,9 +41,12 @@ function ProjectPlannerApp() {
         }}
         task={null}
         defaultStartDate={newTaskDate}
-        onSave={handleSaveTask}
-        people={state.people}
-        allTasks={state.tasks}
+        onSave={(taskData) => {
+          setIsAddTaskOpen(false);
+          setNewTaskDate(null);
+        }}
+        people={[]}
+        allTasks={[]}
       />
 
       {/* Settings Modal */}

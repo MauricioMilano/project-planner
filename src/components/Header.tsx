@@ -1,19 +1,17 @@
 "use client";
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProject } from '../context/ProjectContext';
-import { Plus, Users, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 
 interface HeaderProps {
-  onAddTask: () => void;
-  onAddPerson: () => void;
   onOpenSettings: () => void;
 }
 
-export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) {
+export function Header({ onOpenSettings }: HeaderProps) {
   const { t } = useTranslation();
-  const { state, dispatch } = useProject();
+  const { state } = useProject();
 
   const handleClearData = () => {
     if (confirm(t('alerts.clearDataConfirm'))) {
@@ -74,22 +72,6 @@ export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) 
           title={t('header.settings')}
         >
           <Settings size={18} />
-        </button>
-
-        <button
-          onClick={onAddPerson}
-          className="hidden sm:flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
-        >
-          <Users size={16} />
-          {t('header.addPerson')}
-        </button>
-        
-        <button
-          onClick={onAddTask}
-          className="flex items-center gap-2 px-4 py-2 bg-[#181d26] text-white rounded-lg font-medium text-sm hover:bg-[#0d1218] transition-colors"
-        >
-          <Plus size={16} />
-          {t('header.addTask')}
         </button>
 
         <button
