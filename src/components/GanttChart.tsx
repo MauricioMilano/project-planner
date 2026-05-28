@@ -140,11 +140,43 @@ export function GanttChart() {
       <div className="flex-1 flex overflow-hidden">
         {/* Fixed left column */}
         <div className="w-48 flex-shrink-0 border-r border-gray-200 flex flex-col">
-          <GanttHeader
-            projectStartDate={projectStartDate}
-            projectEndDate={projectEndDate}
-            dayWidth={DAY_WIDTH}
-          />
+          {/* Task name column header */}
+          <div className="h-12 flex items-center px-3 border-b border-gray-200 bg-gray-50">
+            <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Task</span>
+          </div>
+          {/* Task rows */}
+          <div className="flex-1 overflow-y-auto">
+            {state.tasks.length === 0 ? (
+              <div className="h-20 flex items-center justify-center">
+                <span className="text-xs text-gray-400">No tasks</span>
+              </div>
+            ) : (
+              state.tasks.map((task, index) => (
+                <div
+                  key={task.id}
+                  className={`h-12 flex items-center px-3 border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
+                    index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                  }`}
+                  onClick={() => handleTaskClick(task)}
+                >
+                  <span className="text-sm text-gray-800 truncate" title={task.name}>
+                    {task.name}
+                  </span>
+                </div>
+              ))
+            )}
+            {/* Empty rows to maintain alignment with timeline */}
+            {state.tasks.length < MIN_TASKS_VISIBLE &&
+              Array.from({ length: MIN_TASKS_VISIBLE - state.tasks.length }).map((_, i) => (
+                <div
+                  key={`empty-${i}`}
+                  className={`h-12 flex items-center px-3 border-b border-gray-100 ${
+                    (state.tasks.length + i) % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+                  }`}
+                />
+              ))
+            }
+          </div>
         </div>
 
         {/* Scrollable timeline */}
