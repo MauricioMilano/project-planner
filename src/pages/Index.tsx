@@ -9,8 +9,10 @@ import { GanttChart } from '../components/GanttChart';
 import { AddPersonModal } from '../components/AddPersonModal';
 import { TaskModal } from '../components/TaskModal';
 import { SettingsModal } from '../components/SettingsModal';
+import { useProject } from '../context/ProjectContext';
 
 function ProjectPlannerApp() {
+  const { deleteTask } = useProject();
   const [isAddPersonOpen, setIsAddPersonOpen] = useState(false);
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -46,6 +48,7 @@ function ProjectPlannerApp() {
           setIsAddTaskOpen(false);
           setNewTaskDate(null);
         }}
+        onDelete={deleteTask}
         people={[]}
         allTasks={[]}
       />

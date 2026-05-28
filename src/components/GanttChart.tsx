@@ -122,7 +122,7 @@ function SortableTaskRow({ task, index, onTaskClick }: SortableTaskRowProps) {
 
 export function GanttChart() {
   const { t } = useTranslation();
-  const { state, updateTask, addTask, reorderTasks } = useProject();
+  const { state, updateTask, addTask, reorderTasks, deleteTask } = useProject();
   const { currentTheme } = useTheme();
   const settings = useSettings();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -212,6 +212,12 @@ export function GanttChart() {
     setIsModalOpen(false);
     setSelectedTask(null);
     setNewTaskDate(null);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    deleteTask(taskId);
+    setIsModalOpen(false);
+    setSelectedTask(null);
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
@@ -450,6 +456,7 @@ export function GanttChart() {
           task={selectedTask}
           defaultStartDate={newTaskDate}
           onSave={handleSaveTask}
+          onDelete={handleDeleteTask}
           people={state.people}
           allTasks={state.tasks}
         />
