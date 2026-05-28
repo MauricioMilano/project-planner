@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { Task, Person } from '../types';
 import { TaskBar } from './TaskBar';
 
@@ -13,22 +14,39 @@ interface GanttRowProps {
   showWeekends?: boolean;
 }
 
-export function GanttRow({ task, person, projectStartDate, dayWidth, onUpdate, onClick, isEven, showWeekends = true }: GanttRowProps) {
+export function GanttRow({ task, person, projectStartDate, dayWidth, onUpdate, onClick, isEven }: GanttRowProps) {
+  const { currentTheme } = useTheme();
+  const colors = currentTheme.colors;
+
   return (
     <div
-      className={`flex border-b border-gray-100 ${
-        isEven ? 'bg-white' : 'bg-gray-50/50'
-      } hover:bg-blue-50/30 transition-colors`}
+      className="flex border-b transition-colors hover:opacity-90"
+      style={{ 
+        backgroundColor: isEven ? colors.card : colors.background,
+        borderColor: colors.border
+      }}
     >
       {/* Task info column */}
-      <div className="w-48 flex-shrink-0 border-r border-gray-200 px-4 py-2 bg-white">
+      <div 
+        className="w-48 flex-shrink-0 px-4 py-2 bg-white"
+        style={{ 
+          borderRight: `1px solid ${colors.border}`,
+          backgroundColor: colors.card
+        }}
+      >
         <div className="flex items-center gap-2">
-          <span className="text-sm font-medium text-gray-900 truncate">
+          <span 
+            className="text-sm font-medium truncate"
+            style={{ color: colors.textPrimary }}
+          >
             {task.name}
           </span>
         </div>
         {task.notes && (
-          <div className="text-xs text-gray-400 truncate mt-0.5">
+          <div 
+            className="text-xs truncate mt-0.5"
+            style={{ color: colors.textSecondary }}
+          >
             {task.notes.substring(0, 30)}{task.notes.length > 30 ? '...' : ''}
           </div>
         )}
@@ -41,10 +59,11 @@ export function GanttRow({ task, person, projectStartDate, dayWidth, onUpdate, o
           {Array.from({ length: 53 }).map((_, i) => (
             <div
               key={i}
-              className={`flex-shrink-0 h-full border-l ${
-                i % 4 === 0 ? 'border-gray-300' : 'border-gray-100'
-              }`}
-              style={{ width: dayWidth * 7 }}
+              className="flex-shrink-0 h-full"
+              style={{ 
+                borderLeft: `1px solid ${i % 4 === 0 ? colors.border : 'transparent'}`,
+                width: dayWidth * 7
+              }}
             />
           ))}
         </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProject } from '../context/ProjectContext';
+import { useTheme } from '../context/ThemeContext';
 import { PersonCard } from './PersonCard';
 import { AddPersonModal } from './AddPersonModal';
 import { Plus } from 'lucide-react';
@@ -8,16 +9,37 @@ import { Plus } from 'lucide-react';
 export function PeoplePanel() {
   const { t } = useTranslation();
   const { state } = useProject();
+  const { currentTheme } = useTheme();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  
+  const colors = currentTheme.colors;
 
   return (
-    <div className="w-72 flex-shrink-0 bg-gray-50 border-r border-gray-200 flex flex-col h-full">
-      <div className="p-4 border-b border-gray-200 bg-white">
+    <div 
+      className="w-72 flex-shrink-0 flex flex-col h-full"
+      style={{ 
+        backgroundColor: colors.background,
+        borderRight: `1px solid ${colors.border}`
+      }}
+    >
+      <div 
+        className="p-4 bg-white"
+        style={{ borderBottom: `1px solid ${colors.border}` }}
+      >
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium text-gray-900 uppercase tracking-wide">
+          <h2 
+            className="text-sm font-medium uppercase tracking-wide"
+            style={{ color: colors.textPrimary }}
+          >
             {t('peoplePanel.title')}
           </h2>
-          <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
+          <span 
+            className="text-xs px-2 py-0.5 rounded-full"
+            style={{ 
+              backgroundColor: colors.secondary,
+              color: colors.textSecondary
+            }}
+          >
             {state.people.length}
           </span>
         </div>
@@ -26,9 +48,13 @@ export function PeoplePanel() {
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {state.people.length === 0 ? (
           <div className="text-center py-8">
-            <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-gray-200 flex items-center justify-center">
+            <div 
+              className="w-12 h-12 mx-auto mb-3 rounded-full flex items-center justify-center"
+              style={{ backgroundColor: colors.secondary }}
+            >
               <svg
-                className="w-6 h-6 text-gray-400"
+                className="w-6 h-6"
+                style={{ color: colors.textSecondary }}
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -41,8 +67,8 @@ export function PeoplePanel() {
                 />
               </svg>
             </div>
-            <p className="text-sm text-gray-500 mb-1">{t('peoplePanel.noMembers')}</p>
-            <p className="text-xs text-gray-400">
+            <p className="text-sm mb-1" style={{ color: colors.textSecondary }}>{t('peoplePanel.noMembers')}</p>
+            <p className="text-xs" style={{ color: colors.textSecondary, opacity: 0.7 }}>
               {t('peoplePanel.noMembersHint')}
             </p>
           </div>
@@ -57,10 +83,18 @@ export function PeoplePanel() {
         )}
       </div>
 
-      <div className="p-3 border-t border-gray-200 bg-white">
+      <div 
+        className="p-3 bg-white"
+        style={{ borderTop: `1px solid ${colors.border}` }}
+      >
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 font-medium hover:border-gray-400 hover:text-gray-700 transition-colors"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors border-2 border-dashed"
+          style={{ 
+            borderColor: colors.border,
+            color: colors.textSecondary,
+            backgroundColor: 'transparent'
+          }}
         >
           <Plus size={18} />
           {t('peoplePanel.addPerson')}

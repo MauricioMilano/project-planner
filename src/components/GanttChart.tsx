@@ -1,6 +1,7 @@
 import React, { useRef, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProject } from '../context/ProjectContext';
+import { useTheme } from '../context/ThemeContext';
 import { GanttHeader } from './GanttHeader';
 import { GanttRow } from './GanttRow';
 import { TaskModal } from './TaskModal';
@@ -9,7 +10,7 @@ import { Plus, ChevronLeft, ChevronRight, GripVertical } from 'lucide-react';
 import { Task } from '../types';
 import { useSettings } from './SettingsModal';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
+import { SortableContext, sortableKeyboardCoordinates, verticalListSortingStrategy, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 const MIN_TASKS_VISIBLE = 10;
@@ -23,8 +24,11 @@ interface SortableTaskRowProps {
   onUpdate: (task: Task) => void;
 }
 
-function SortableTaskRow({ task, index, projectStartDate, dayWidth, onTaskClick, onUpdate }: SortableTaskRowProps) {
-  const { state, getPersonById } = useProject();
+function SortableTaskRow({ task, index, projectStartDate, dayWidth, onTaskClick }: SortableTaskRowProps) {
+  const { state } = useProject();
+  const { currentTheme } = useTheme();
+  const colors = currentTheme.colors;
+  
   const {
     attributes,
     listeners,
@@ -40,29 +44,31 @@ function SortableTaskRow({ task, index, projectStartDate, dayWidth, onTaskClick,
     opacity: isDragging ? 0.5 : 1,
   };
 
-  const person = getPersonById(task.assigneeId);
-
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`h-12 flex items-center border-b border-gray-100 cursor-pointer hover:bg-gray-50 ${
-        index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
+      className={`h-12 flex items-center cursor-pointer hover:opacity-80 ${
+        index % 2 === 0 ? '' : ''
       } ${isDragging ? 'z-50 shadow-lg' : ''}`}
     >
       <div
         {...attributes}
         {...listeners}
-        className="h-full flex items-center px-2 cursor-grab active:cursor-grabbing hover:bg-gray-100"
+        className="h-full flex items-center px-2 cursor-grab active:cursor-grabbing"
         onClick={(e) => {
           e.stopPropagation();
           onTaskClick(task);
         }}
       >
-        <GripVertical size={14} className="text-gray-400" />
+        <GripVertical size={14} style={{ color: colors.textSecondary }} />
       </div>
       <div className="flex-1 px-2 min-w-0">
-        <span className="text-sm text-gray-800 truncate block" title={task.name}>
+        <span 
+          className="text-sm truncate block" 
+          style={{ color: colors.textPrimary }}
+          title={task.name}
+        >
           {task.name}
         </span>
       </div>
@@ -73,12 +79,14 @@ function SortableTaskRow({ task, index, projectStartDate, dayWidth, onTaskClick,
 export function GanttChart() {
   const { t } = useTranslation();
   const { state, updateTask, addTask, reorderTasks } = useProject();
+  const { currentTheme } = useTheme();
   const settings = useSettings();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTaskDate, setNewTaskDate] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const colors = currentTheme.colors;
   const dayWidth = settings.dayWidth;
 
   const sensors = useSensors(
@@ -191,40 +199,65 @@ export function GanttChart() {
       collisionDetection={closestCenter}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex-1 flex flex-col overflow-hidden bg-white">
+      <div 
+        className="flex-1 flex flex-col overflow-hidden"
+        style={{ backgroundColor: colors.background }}
+      >
         {/* Toolbar */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
+        <div 
+          className="flex items-center justify-between px-4 py-3"
+          style={{ 
+            backgroundColor: colors.card,
+            borderBottom: `1px solid ${colors.border}`
+          }}
+        >
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-medium text-gray-700">{t('gantt.title')}</h2>
-            <span className="text-xs text-gray-400">
+            <h2 className="text-sm font-medium" style={{ color: colors.textPrimary }}>{t('gantt.title')}</h2>
+            <span className="text-xs" style={{ color: colors.textSecondary }}>
               {state.tasks.length} {state.tasks.length !== 1 ? t('export.taskCount') : t('task.taskNameLabel').toLowerCase()}
             </span>
-            <span className="text-xs text-gray-400 ml-2">
+            <span className="text-xs ml-2" style={{ color: colors.textSecondary }}>
               {t('gantt.dragToReorder')}
             </span>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={scrollToToday}
-              className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
+              className="px-3 py-1.5 text-xs font-medium rounded-md transition-colors"
+              style={{ 
+                color: colors.textSecondary,
+                backgroundColor: 'transparent'
+              }}
             >
               {t('gantt.today')}
             </button>
             <button
               onClick={() => scrollRef.current && (scrollRef.current.scrollLeft -= 200)}
-              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+              className="p-1.5 rounded-md transition-colors"
+              style={{ 
+                color: colors.textSecondary,
+                backgroundColor: 'transparent'
+              }}
             >
               <ChevronLeft size={16} />
             </button>
             <button
               onClick={() => scrollRef.current && (scrollRef.current.scrollLeft += 200)}
-              className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+              className="p-1.5 rounded-md transition-colors"
+              style={{ 
+                color: colors.textSecondary,
+                backgroundColor: 'transparent'
+              }}
             >
               <ChevronRight size={16} />
             </button>
             <button
               onClick={handleAddTask}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#181d26] text-white text-sm font-medium rounded-lg hover:bg-[#0d1218] transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
+              style={{ 
+                backgroundColor: colors.buttonPrimary,
+                color: colors.buttonSecondary
+              }}
             >
               <Plus size={14} />
               {t('header.addTask')}
@@ -235,17 +268,26 @@ export function GanttChart() {
         {/* Gantt content */}
         <div className="flex-1 flex overflow-hidden">
           {/* Fixed left column */}
-          <div className="w-48 flex-shrink-0 border-r border-gray-200 flex flex-col">
+          <div 
+            className="w-48 flex-shrink-0 flex flex-col"
+            style={{ borderRight: `1px solid ${colors.border}` }}
+          >
             {/* Task name column header */}
-            <div className="h-12 flex items-center px-3 border-b border-gray-200 bg-gray-50">
-              <GripVertical size={14} className="text-gray-400 mr-2" />
-              <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('gantt.task')}</span>
+            <div 
+              className="h-12 flex items-center px-3"
+              style={{ 
+                backgroundColor: colors.secondary,
+                borderBottom: `1px solid ${colors.border}`
+              }}
+            >
+              <GripVertical size={14} className="mr-2" style={{ color: colors.textSecondary }} />
+              <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: colors.textSecondary }}>{t('gantt.task')}</span>
             </div>
             {/* Task rows */}
             <div className="flex-1 overflow-y-auto">
               {state.tasks.length === 0 ? (
                 <div className="h-20 flex items-center justify-center">
-                  <span className="text-xs text-gray-400">{t('gantt.noTasks')}</span>
+                  <span className="text-xs" style={{ color: colors.textSecondary }}>{t('gantt.noTasks')}</span>
                 </div>
               ) : (
                 <SortableContext
@@ -270,9 +312,11 @@ export function GanttChart() {
                 Array.from({ length: MIN_TASKS_VISIBLE - state.tasks.length }).map((_, i) => (
                   <div
                     key={`empty-${i}`}
-                    className={`h-12 flex items-center px-3 border-b border-gray-100 ${
-                      (state.tasks.length + i) % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
-                    }`}
+                    className="h-12 flex items-center px-3"
+                    style={{ 
+                      borderBottom: `1px solid ${colors.border}`,
+                      backgroundColor: i % 2 === 0 ? colors.card : colors.background
+                    }}
                   />
                 ))
               }
@@ -300,9 +344,13 @@ export function GanttChart() {
                 {state.tasks.length === 0 ? (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-center py-12">
-                      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                      <div 
+                        className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: colors.secondary }}
+                      >
                         <svg
-                          className="w-8 h-8 text-gray-400"
+                          className="w-8 h-8"
+                          style={{ color: colors.textSecondary }}
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
@@ -315,8 +363,8 @@ export function GanttChart() {
                           />
                         </svg>
                       </div>
-                      <p className="text-sm text-gray-500 mb-1">{t('gantt.noTasks')}</p>
-                      <p className="text-xs text-gray-400 mb-4">
+                      <p className="text-sm mb-1" style={{ color: colors.textSecondary }}>{t('gantt.noTasks')}</p>
+                      <p className="text-xs mb-4" style={{ color: colors.textSecondary, opacity: 0.7 }}>
                         {t('gantt.noTasksHint')}
                       </p>
                       <button
@@ -324,7 +372,11 @@ export function GanttChart() {
                           e.stopPropagation();
                           handleAddTask();
                         }}
-                        className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#181d26] text-white text-sm font-medium rounded-lg hover:bg-[#0d1218] transition-colors"
+                        className="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-colors"
+                        style={{ 
+                          backgroundColor: colors.buttonPrimary,
+                          color: colors.buttonSecondary
+                        }}
                       >
                         <Plus size={14} />
                         {t('gantt.addFirstTask')}

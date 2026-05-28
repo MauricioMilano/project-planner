@@ -2,8 +2,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { X, Globe, Download, Upload, FileDown, FileSpreadsheet, FileJson, FileText, Loader2 } from 'lucide-react';
+import { X, Globe, Download, Upload, FileDown, FileSpreadsheet, FileJson, FileText, Loader2, Palette } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
+import { ThemeSelector } from './ThemeSelector';
 
 interface Settings {
   workingDaysPerWeek: number;
@@ -26,7 +27,7 @@ const DEFAULT_SETTINGS: Settings = {
 
 const STORAGE_KEY = 'project-planner-settings';
 
-type SettingsTab = 'display' | 'data' | 'language';
+type SettingsTab = 'display' | 'data' | 'language' | 'themes';
 
 const languages = [
   { code: 'en', name: 'English', flag: '🇺🇸' },
@@ -108,35 +109,50 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
   const tabs = [
     { id: 'display' as const, label: t('settings.displaySection'), icon: '🎨' },
+    { id: 'themes' as const, label: t('themes.tab'), icon: '🎭' },
     { id: 'data' as const, label: t('export.title'), icon: '📁' },
     { id: 'language' as const, label: t('settings.languageSection'), icon: '🌐' },
   ];
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div 
+        className="bg-[var(--theme-card)] rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden"
+        style={{ color: 'var(--theme-text-primary)' }}
+      >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">{t('settings.title')}</h2>
+        <div 
+          className="flex items-center justify-between px-6 py-4 border-b"
+          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-card)' }}
+        >
+          <h2 className="text-lg font-semibold">{t('settings.title')}</h2>
           <button
             onClick={onClose}
-            className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+            className="p-2 rounded-lg transition-colors hover:bg-[var(--theme-card-hover)]"
+            style={{ color: 'var(--theme-text-secondary)' }}
           >
             <X size={20} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200">
+        <div 
+          className="flex border-b"
+          style={{ borderColor: 'var(--theme-border)' }}
+        >
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               className={`flex-1 py-3 px-4 text-sm font-medium transition-colors border-b-2 ${
                 activeTab === tab.id
-                  ? 'border-[#181d26] text-[#181d26]'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'border-[var(--theme-accent)]'
+                  : 'border-transparent'
               }`}
+              style={{ 
+                color: activeTab === tab.id ? 'var(--theme-accent)' : 'var(--theme-text-secondary)',
+                backgroundColor: activeTab === tab.id ? 'var(--theme-card)' : 'transparent'
+              }}
             >
               <span className="mr-1">{tab.icon}</span>
               {tab.label}
@@ -151,42 +167,37 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             <div className="space-y-6">
               {/* Day Width */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                   {t('settings.dayWidthLabel')}: {settings.dayWidth}px
                 </label>
                 <div className="flex gap-2">
-                  <button
-                    onClick={() => setSettings({ ...settings, dayWidth: 24 })}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors border-2 ${
-                      settings.dayWidth === 24
-                        ? 'bg-[#181d26] text-white border-[#181d26]'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {t('settings.dayWidthCompact')}
-                  </button>
-                  <button
-                    onClick={() => setSettings({ ...settings, dayWidth: 32 })}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors border-2 ${
-                      settings.dayWidth === 32
-                        ? 'bg-[#181d26] text-white border-[#181d26]'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {t('settings.dayWidthNormal')}
-                  </button>
-                  <button
-                    onClick={() => setSettings({ ...settings, dayWidth: 48 })}
-                    className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors border-2 ${
-                      settings.dayWidth === 48
-                        ? 'bg-[#181d26] text-white border-[#181d26]'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {t('settings.dayWidthSpacious')}
-                  </button>
+                  {[
+                    { value: 24, label: t('settings.dayWidthCompact') },
+                    { value: 32, label: t('settings.dayWidthNormal') },
+                    { value: 48, label: t('settings.dayWidthSpacious') },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      onClick={() => setSettings({ ...settings, dayWidth: option.value })}
+                      className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all border-2 ${
+                        settings.dayWidth === option.value
+                          ? 'border-[var(--theme-accent)]'
+                          : 'border-[var(--theme-border)]'
+                      }`}
+                      style={{ 
+                        backgroundColor: settings.dayWidth === option.value 
+                          ? 'var(--theme-accent)' 
+                          : 'var(--theme-card)',
+                        color: settings.dayWidth === option.value 
+                          ? 'white' 
+                          : 'var(--theme-text-primary)'
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
                 </div>
-                <p className="text-xs text-gray-400 mt-2">
+                <p className="text-xs mt-2" style={{ color: 'var(--theme-text-secondary)' }}>
                   {t('settings.dayWidthDesc')}
                 </p>
               </div>
@@ -194,23 +205,25 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               {/* Show Weekends */}
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium" style={{ color: 'var(--theme-text-primary)' }}>
                     {t('settings.showWeekends')}
                   </label>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>
                     {t('settings.showWeekendsDesc')}
                   </p>
                 </div>
                 <button
                   onClick={() => setSettings({ ...settings, showWeekends: !settings.showWeekends })}
                   className={`relative w-12 h-7 rounded-full transition-colors ${
-                    settings.showWeekends ? 'bg-[#181d26]' : 'bg-gray-300'
+                    settings.showWeekends ? '' : ''
                   }`}
+                  style={{ backgroundColor: settings.showWeekends ? 'var(--theme-accent)' : 'var(--theme-border)' }}
                 >
                   <span
-                    className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
+                    className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
                       settings.showWeekends ? 'translate-x-5' : ''
                     }`}
+                    style={{ left: settings.showWeekends ? 'auto' : '4px', right: settings.showWeekends ? '4px' : 'auto' }}
                   />
                 </button>
               </div>
@@ -218,36 +231,39 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               {/* Auto Calculate End Date */}
               <div className="flex items-center justify-between">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
+                  <label className="block text-sm font-medium" style={{ color: 'var(--theme-text-primary)' }}>
                     {t('settings.autoCalculate')}
                   </label>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--theme-text-secondary)' }}>
                     {t('settings.autoCalculateDesc')}
                   </p>
                 </div>
                 <button
                   onClick={() => setSettings({ ...settings, autoCalculateEndDate: !settings.autoCalculateEndDate })}
-                  className={`relative w-12 h-7 rounded-full transition-colors ${
-                    settings.autoCalculateEndDate ? 'bg-[#181d26]' : 'bg-gray-300'
-                  }`}
+                  className="relative w-12 h-7 rounded-full transition-colors"
+                  style={{ backgroundColor: settings.autoCalculateEndDate ? 'var(--theme-accent)' : 'var(--theme-border)' }}
                 >
                   <span
-                    className={`absolute top-1 left-1 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
+                    className={`absolute top-1 w-5 h-5 bg-white rounded-full transition-transform shadow-sm ${
                       settings.autoCalculateEndDate ? 'translate-x-5' : ''
                     }`}
+                    style={{ left: settings.autoCalculateEndDate ? 'auto' : '4px', right: settings.autoCalculateEndDate ? '4px' : 'auto' }}
                   />
                 </button>
               </div>
             </div>
           )}
 
+          {/* Themes Tab */}
+          {activeTab === 'themes' && <ThemeSelector />}
+
           {/* Data Tab (Import/Export) */}
           {activeTab === 'data' && (
             <div className="space-y-6">
               {/* Export Section */}
               <div>
-                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                  <Download size={16} />
+                <h3 className="text-sm font-medium mb-3 flex items-center gap-2" style={{ color: 'var(--theme-text-primary)' }}>
+                  <Download size={16} style={{ color: 'var(--theme-accent)' }} />
                   {t('export.title')}
                 </h3>
                 <div className="space-y-2">
@@ -261,7 +277,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       key={option.id}
                       onClick={() => handleExport(option.id)}
                       disabled={exporting !== null}
-                      className="w-full flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-all disabled:opacity-50"
+                      className="w-full flex items-center gap-3 p-3 rounded-lg border transition-all hover:bg-[var(--theme-card-hover)]"
+                      style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-card)' }}
                     >
                       {exporting === option.id ? (
                         <Loader2 size={20} className="text-gray-400 animate-spin" />
@@ -269,8 +286,8 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                         option.icon
                       )}
                       <div className="flex-1 text-left">
-                        <div className="text-sm font-medium text-gray-900">{option.label}</div>
-                        <div className="text-xs text-gray-500">{option.desc}</div>
+                        <div className="text-sm font-medium" style={{ color: 'var(--theme-text-primary)' }}>{option.label}</div>
+                        <div className="text-xs" style={{ color: 'var(--theme-text-secondary)' }}>{option.desc}</div>
                       </div>
                     </button>
                   ))}
@@ -278,12 +295,19 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               </div>
 
               {/* Import Section */}
-              <div className="pt-4 border-t border-gray-200">
-                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center gap-2">
-                  <Upload size={16} />
+              <div className="pt-4 border-t" style={{ borderColor: 'var(--theme-border)' }}>
+                <h3 className="text-sm font-medium mb-3 flex items-center gap-2" style={{ color: 'var(--theme-text-primary)' }}>
+                  <Upload size={16} style={{ color: 'var(--theme-accent)' }} />
                   {t('import.title')}
                 </h3>
-                <ImportSection onImport={handleImport} t={t} />
+                <ImportSection onImport={handleImport} t={t} themeColors={{
+                  card: 'var(--theme-card)',
+                  border: 'var(--theme-border)',
+                  text: 'var(--theme-text-primary)',
+                  textSecondary: 'var(--theme-text-secondary)',
+                  background: 'var(--theme-background)',
+                  accent: 'var(--theme-accent)',
+                }} />
               </div>
             </div>
           )}
@@ -292,7 +316,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {activeTab === 'language' && (
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium mb-2" style={{ color: 'var(--theme-text-primary)' }}>
                   {t('settings.languageLabel')}
                 </label>
                 <div className="space-y-2">
@@ -302,14 +326,17 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
                       onClick={() => handleLanguageChange(lang.code)}
                       className={`w-full flex items-center gap-3 p-3 rounded-lg border-2 transition-all ${
                         i18n.language === lang.code
-                          ? 'border-[#181d26] bg-gray-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-[var(--theme-accent)]'
+                          : 'border-[var(--theme-border)]'
                       }`}
+                      style={{ 
+                        backgroundColor: i18n.language === lang.code ? 'var(--theme-card-hover)' : 'var(--theme-card)'
+                      }}
                     >
                       <span className="text-2xl">{lang.flag}</span>
-                      <span className={`font-medium ${
-                        i18n.language === lang.code ? 'text-[#181d26]' : 'text-gray-700'
-                      }`}>
+                      <span className="font-medium" style={{ 
+                        color: i18n.language === lang.code ? 'var(--theme-accent)' : 'var(--theme-text-primary)'
+                      }}>
                         {lang.name}
                       </span>
                       {i18n.language === lang.code && (
@@ -324,23 +351,29 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
         </div>
 
         {/* Footer */}
-        <div className="px-6 py-4 border-t border-gray-200 bg-gray-50 flex gap-3">
+        <div 
+          className="px-6 py-4 border-t flex gap-3"
+          style={{ borderColor: 'var(--theme-border)', backgroundColor: 'var(--theme-secondary)' }}
+        >
           <button
             onClick={handleReset}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors"
+            className="px-4 py-2 rounded-lg font-medium transition-colors hover:bg-[var(--theme-card-hover)]"
+            style={{ borderColor: 'var(--theme-border)', border: '1px solid', backgroundColor: 'var(--theme-card)', color: 'var(--theme-text-primary)' }}
           >
             {t('settings.resetDefaults')}
           </button>
           <div className="flex-1" />
           <button
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors"
+            className="px-4 py-2 rounded-lg font-medium transition-colors hover:bg-[var(--theme-card-hover)]"
+            style={{ borderColor: 'var(--theme-border)', border: '1px solid', backgroundColor: 'var(--theme-card)', color: 'var(--theme-text-primary)' }}
           >
             {t('common.cancel')}
           </button>
           <button
             onClick={handleSave}
-            className="px-4 py-2 bg-[#181d26] text-white rounded-lg font-medium hover:bg-[#0d1218] transition-colors"
+            className="px-4 py-2 rounded-lg font-medium transition-colors"
+            style={{ backgroundColor: 'var(--theme-button-primary)', color: 'white' }}
           >
             {t('settings.saveSettings')}
           </button>
@@ -350,8 +383,19 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   );
 }
 
-// Import Section Component
-function ImportSection({ onImport, t }: { onImport: (data: any) => void; t: any }) {
+// Import Section Component with theme support
+function ImportSection({ onImport, t, themeColors }: { 
+  onImport: (data: any) => void; 
+  t: any;
+  themeColors: {
+    card: string;
+    border: string;
+    text: string;
+    textSecondary: string;
+    background: string;
+    accent: string;
+  };
+}) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [dragActive, setDragActive] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -397,8 +441,9 @@ function ImportSection({ onImport, t }: { onImport: (data: any) => void; t: any 
   return (
     <div
       className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
-        dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'
+        dragActive ? 'border-[var(--theme-accent)] bg-[var(--theme-card-hover)]' : ''
       }`}
+      style={{ borderColor: dragActive ? undefined : 'var(--theme-border)', backgroundColor: 'var(--theme-background)' }}
       onDrop={handleDrop}
       onDragOver={(e) => { e.preventDefault(); setDragActive(true); }}
       onDragLeave={() => setDragActive(false)}
@@ -413,17 +458,18 @@ function ImportSection({ onImport, t }: { onImport: (data: any) => void; t: any 
       
       {selectedFile ? (
         <div className="flex items-center justify-center gap-2">
-          <FileJson size={20} className="text-blue-500" />
-          <span className="text-sm text-gray-700">{selectedFile.name}</span>
+          <FileJson size={20} style={{ color: themeColors.accent }} />
+          <span className="text-sm" style={{ color: themeColors.text }}>{selectedFile.name}</span>
           {importing && <Loader2 size={16} className="text-gray-400 animate-spin" />}
         </div>
       ) : (
         <>
-          <Upload size={24} className="mx-auto text-gray-400 mb-2" />
-          <p className="text-sm text-gray-600 mb-2">{t('import.dropzone')}</p>
+          <Upload size={24} className="mx-auto mb-2" style={{ color: 'var(--theme-text-secondary)' }} />
+          <p className="text-sm mb-2" style={{ color: themeColors.text }}>{t('import.dropzone')}</p>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="px-3 py-1.5 bg-[#181d26] text-white text-sm rounded-lg hover:bg-[#0d1218] transition-colors"
+            className="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
+            style={{ backgroundColor: 'var(--theme-button-primary)', color: 'white' }}
           >
             {t('import.selectFile')}
           </button>
@@ -434,19 +480,23 @@ function ImportSection({ onImport, t }: { onImport: (data: any) => void; t: any 
 }
 
 export function useSettings() {
-  const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
+  const [settings, setSettings] = useState<any>({
+    dayWidth: 32,
+    showWeekends: true,
+    autoCalculateEndDate: true,
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
     if (stored) {
       try {
-        setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(stored) });
+        setSettings({ ...settings, ...JSON.parse(stored) });
       } catch {
         // Keep defaults
       }
     }
 
-    const handleSettingsChange = (e: CustomEvent<Settings>) => {
+    const handleSettingsChange = (e: any) => {
       setSettings(e.detail);
     };
 

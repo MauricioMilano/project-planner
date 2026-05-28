@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { ProjectProvider } from '../context/ProjectContext';
+import { ThemeProvider } from '../context/ThemeContext';
 import { Header } from '../components/Header';
 import { PeoplePanel } from '../components/PeoplePanel';
 import { GanttChart } from '../components/GanttChart';
@@ -16,7 +17,7 @@ function ProjectPlannerApp() {
   const [newTaskDate, setNewTaskDate] = useState<string | null>(null);
 
   return (
-    <div className="h-screen flex flex-col bg-gray-100">
+    <div className="h-screen flex flex-col">
       <Header 
         onOpenSettings={() => setIsSettingsOpen(true)}
       />
@@ -60,8 +61,10 @@ function ProjectPlannerApp() {
 
 export default function Index() {
   return (
-    <ProjectProvider>
-      <ProjectPlannerApp />
-    </ProjectProvider>
+    <ThemeProvider>
+      <ProjectProvider>
+        <ProjectPlannerApp />
+      </ProjectProvider>
+    </ThemeProvider>
   );
 }

@@ -139,6 +139,18 @@
     "resetDefaults": "Reset Defaults",
     "saveSettings": "Save Settings"
   },
+  "themes": {
+    "title": "Visual Theme",
+    "tab": "Themes",
+    "hint": "Click a theme to apply it instantly. Your preference is saved automatically.",
+    "classic": "Classic",
+    "starryNight": "Starry Night",
+    "aurora": "Aurora Boreal",
+    "sereneNature": "Serene Nature",
+    "energeticCoral": "Energetic Coral",
+    "glamourPink": "Glamour Pink",
+    "minimalist": "Minimalist"
+  },
   "alerts": {
     "clearDataConfirm": "Clear all data? This cannot be undone.",
     "clearDataSuccess": "All data cleared"

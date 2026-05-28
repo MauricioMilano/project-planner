@@ -25,7 +25,7 @@
   "peoplePanel": {
     "title": "Equipe",
     "noMembers": "Nenhum membro da equipe ainda",
-    "noMembersHint": "Adicione pessoas para atribuí-las a tarefas",
+    "noMembersHint": "Adicione pessoas para atribuídas a tarefas",
     "addPerson": "Adicionar Pessoa"
   },
   "gantt": {
@@ -138,6 +138,18 @@
     "version": "Versão",
     "resetDefaults": "Restaurar Padrões",
     "saveSettings": "Salvar Configurações"
+  },
+  "themes": {
+    "title": "Tema Visual",
+    "tab": "Temas",
+    "hint": "Clique em um tema para aplicá-lo instantaneamente. Sua preferência é salva automaticamente.",
+    "classic": "Clássico",
+    "starryNight": "Noite Estrelada",
+    "aurora": "Aurora Boreal",
+    "sereneNature": "Natureza Serena",
+    "energeticCoral": "Coral Energético",
+    "glamourPink": "Rosa Glamour",
+    "minimalist": "Minimalista"
   },
   "alerts": {
     "clearDataConfirm": "Limpar todos os dados? Isso não pode ser desfeito.",

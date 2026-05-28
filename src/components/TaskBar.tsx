@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useTheme } from '../context/ThemeContext';
 import { Task, Person } from '../types';
-import { calculateTaskPosition, getEndDate, differenceInDays, addDays, formatDate, getInitials } from '../hooks/useGanttCalculations';
+import { calculateTaskPosition, getEndDate, addDays, formatDate, getInitials } from '../hooks/useGanttCalculations';
 import { Calendar, AlertCircle, CheckCircle, Clock } from 'lucide-react';
 
 interface TaskBarProps {
@@ -13,6 +14,7 @@ interface TaskBarProps {
 }
 
 export function TaskBar({ task, person, projectStartDate, dayWidth, onUpdate, onClick }: TaskBarProps) {
+  const { currentTheme } = useTheme();
   const [isDragging, setIsDragging] = useState(false);
   const [isResizing, setIsResizing] = useState<'left' | 'right' | null>(null);
   const [showTooltip, setShowTooltip] = useState(false);
@@ -22,12 +24,14 @@ export function TaskBar({ task, person, projectStartDate, dayWidth, onUpdate, on
   const width = task.duration * dayWidth;
   const endDate = getEndDate(task.startDate, task.duration);
 
+  const colors = currentTheme.colors;
+
   const getPriorityColor = () => {
     switch (task.priority) {
-      case 'high': return { bg: '#aa2d00', text: '#ffffff' };
-      case 'medium': return { bg: '#1b61c9', text: '#ffffff' };
-      case 'low': return { bg: '#0a2e0e', text: '#ffffff' };
-      default: return { bg: '#41454d', text: '#ffffff' };
+      case 'high': return { bg: colors.priorityHigh, text: '#ffffff' };
+      case 'medium': return { bg: colors.priorityMedium, text: '#ffffff' };
+      case 'low': return { bg: colors.priorityLow, text: '#ffffff' };
+      default: return { bg: colors.priorityMedium, text: '#ffffff' };
     }
   };
 
@@ -35,28 +39,28 @@ export function TaskBar({ task, person, projectStartDate, dayWidth, onUpdate, on
     switch (task.status) {
       case 'done':
         return {
-          bg: '#006400',
+          bg: colors.statusDone,
           pattern: '',
           icon: <CheckCircle size={14} className="text-white/80" />,
           textColor: '#ffffff'
         };
       case 'in-progress':
         return {
-          bg: getPriorityColor().bg,
+          bg: colors.statusInProgress,
           pattern: '',
           icon: <Clock size={14} className="text-white/80" />,
           textColor: '#ffffff'
         };
       case 'todo':
         return {
-          bg: '#f8fafc',
+          bg: colors.statusTodo,
           pattern: 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.05) 4px, rgba(0,0,0,0.05) 8px)',
-          icon: <AlertCircle size={14} className="text-gray-400" />,
-          textColor: '#181d26'
+          icon: <AlertCircle size={14} className="text-white/60" />,
+          textColor: '#ffffff'
         };
       default:
         return {
-          bg: getPriorityColor().bg,
+          bg: colors.priorityMedium,
           pattern: '',
           icon: null,
           textColor: '#ffffff'
@@ -64,9 +68,8 @@ export function TaskBar({ task, person, projectStartDate, dayWidth, onUpdate, on
     }
   };
 
-  const colors = getPriorityColor();
   const statusStyles = getStatusStyles();
-  const isLightBg = task.status === 'todo';
+  const priorityColors = getPriorityColor();
 
   const handleMouseDown = (e: React.MouseEvent, type: 'move' | 'left' | 'right') => {
     e.preventDefault();
@@ -154,7 +157,8 @@ export function TaskBar({ task, person, projectStartDate, dayWidth, onUpdate, on
     >
       {/* Left resize handle */}
       <div
-        className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 bg-black/10 rounded-l-md"
+        className="absolute left-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 rounded-l-md"
+        style={{ backgroundColor: 'rgba(0,0,0,0.15)' }}
         onMouseDown={(e) => handleMouseDown(e, 'left')}
       />
 
@@ -188,26 +192,36 @@ export function TaskBar({ task, person, projectStartDate, dayWidth, onUpdate, on
 
       {/* Right resize handle */}
       <div
-        className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 bg-black/10 rounded-r-md"
+        className="absolute right-0 top-0 bottom-0 w-2 cursor-ew-resize opacity-0 group-hover:opacity-100 rounded-r-md"
+        style={{ backgroundColor: 'rgba(0,0,0,0.15)' }}
         onMouseDown={(e) => handleMouseDown(e, 'right')}
       />
 
       {/* Tooltip */}
       {showTooltip && (
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg shadow-lg z-50 whitespace-nowrap">
+        <div 
+          className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 text-xs rounded-lg shadow-lg z-50 whitespace-nowrap"
+          style={{ 
+            backgroundColor: colors.primary,
+            color: colors.background
+          }}
+        >
           <div className="font-medium">{task.name}</div>
-          <div className="text-gray-300 mt-1">
+          <div className="opacity-80 mt-1">
             {formatDate(task.startDate)} → {formatDate(endDate)}
           </div>
-          <div className="text-gray-300">
+          <div className="opacity-80">
             {task.duration} day{task.duration !== 1 ? 's' : ''} • {task.priority} priority
           </div>
           {person && (
-            <div className="text-gray-300">
+            <div className="opacity-80">
               Assigned to {person.name}
             </div>
           )}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-gray-900" />
+          <div 
+            className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent"
+            style={{ borderTopColor: colors.primary }}
+          />
         </div>
       )}
     </div>

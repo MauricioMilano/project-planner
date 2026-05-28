@@ -1,5 +1,6 @@
 import React from 'react';
-import { getMonthsBetween, differenceInDays, parseDate, formatDateToISO } from '../hooks/useGanttCalculations';
+import { useTheme } from '../context/ThemeContext';
+import { getMonthsBetween, differenceInDays, formatDateToISO } from '../hooks/useGanttCalculations';
 
 interface GanttHeaderProps {
   projectStartDate: string;
@@ -8,8 +9,10 @@ interface GanttHeaderProps {
 }
 
 export function GanttHeader({ projectStartDate, projectEndDate, dayWidth }: GanttHeaderProps) {
+  const { currentTheme } = useTheme();
+  const colors = currentTheme.colors;
+  
   const months = getMonthsBetween(projectStartDate, projectEndDate);
-  const totalDays = differenceInDays(projectStartDate, projectEndDate) + 1;
   
   // Calculate month widths in the project timeline
   const monthElements = months.map((month, idx) => {
@@ -24,7 +27,7 @@ export function GanttHeader({ projectStartDate, projectEndDate, dayWidth }: Gant
     let displayDays = month.daysInMonth;
     
     if (idx === 0) {
-      const projStart = parseDate(projectStartDate);
+      const projStart = new Date(projectStartDate);
       const monthStartDate = new Date(month.year, ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(month.month), 1);
       if (projStart.getMonth() === monthStartDate.getMonth() && projStart.getFullYear() === monthStartDate.getFullYear()) {
         startOffset = projStart.getDate() - 1;
@@ -33,7 +36,7 @@ export function GanttHeader({ projectStartDate, projectEndDate, dayWidth }: Gant
     }
     
     if (idx === months.length - 1) {
-      const projEnd = parseDate(projectEndDate);
+      const projEnd = new Date(projectEndDate);
       const monthEndDate = new Date(month.year, ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].indexOf(month.month) + 1, 0);
       if (projEnd.getMonth() === monthEndDate.getMonth() && projEnd.getFullYear() === monthEndDate.getFullYear()) {
         displayDays = projEnd.getDate() - (idx === 0 ? startOffset : 0);
@@ -43,16 +46,21 @@ export function GanttHeader({ projectStartDate, projectEndDate, dayWidth }: Gant
     return (
       <div
         key={`${month.month}-${month.year}`}
-        className="flex-shrink-0 border-l border-gray-200 px-3 py-2 bg-white"
+        className="flex-shrink-0 px-3 py-2"
         style={{ 
           width: displayDays * dayWidth,
-          minWidth: displayDays * dayWidth
+          minWidth: displayDays * dayWidth,
+          borderLeft: `1px solid ${colors.border}`,
+          backgroundColor: colors.card
         }}
       >
-        <div className="text-sm font-medium text-gray-700 whitespace-nowrap">
+        <div 
+          className="text-sm font-medium whitespace-nowrap"
+          style={{ color: colors.textPrimary }}
+        >
           {month.month} {month.year}
         </div>
-        <div className="text-xs text-gray-400">
+        <div className="text-xs" style={{ color: colors.textSecondary }}>
           {displayDays} days
         </div>
       </div>
@@ -60,10 +68,25 @@ export function GanttHeader({ projectStartDate, projectEndDate, dayWidth }: Gant
   });
 
   return (
-    <div className="flex border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+    <div 
+      className="flex border-b"
+      style={{ 
+        backgroundColor: colors.card,
+        borderColor: colors.border
+      }}
+    >
       {/* Row label column */}
-      <div className="w-48 flex-shrink-0 border-r border-gray-200 px-4 py-2 bg-white">
-        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+      <div 
+        className="w-48 flex-shrink-0 px-4 py-2 bg-white"
+        style={{ 
+          borderRight: `1px solid ${colors.border}`,
+          backgroundColor: colors.card
+        }}
+      >
+        <span 
+          className="text-xs font-medium uppercase tracking-wide"
+          style={{ color: colors.textSecondary }}
+        >
           Task
         </span>
       </div>

@@ -3,6 +3,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useProject } from '../context/ProjectContext';
+import { useTheme } from '../context/ThemeContext';
 import { Settings } from 'lucide-react';
 
 interface HeaderProps {
@@ -12,6 +13,9 @@ interface HeaderProps {
 export function Header({ onOpenSettings }: HeaderProps) {
   const { t } = useTranslation();
   const { state } = useProject();
+  const { currentTheme } = useTheme();
+  
+  const colors = currentTheme.colors;
 
   const handleClearData = () => {
     if (confirm(t('alerts.clearDataConfirm'))) {
@@ -21,13 +25,23 @@ export function Header({ onOpenSettings }: HeaderProps) {
   };
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-20">
+    <header 
+      className="px-6 py-3 flex items-center justify-between sticky top-0 z-20"
+      style={{ 
+        backgroundColor: colors.card,
+        borderBottom: `1px solid ${colors.border}`
+      }}
+    >
       {/* Logo and title */}
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#181d26] flex items-center justify-center">
+          <div 
+            className="w-8 h-8 rounded-lg flex items-center justify-center"
+            style={{ backgroundColor: colors.primary }}
+          >
             <svg
-              className="w-5 h-5 text-white"
+              className="w-5 h-5"
+              style={{ color: colors.background }}
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -40,26 +54,32 @@ export function Header({ onOpenSettings }: HeaderProps) {
               />
             </svg>
           </div>
-          <h1 className="text-lg font-semibold text-gray-900">
+          <h1 
+            className="text-lg font-semibold"
+            style={{ color: colors.textPrimary }}
+          >
             {t('header.title')}
           </h1>
         </div>
         
         {/* Stats */}
-        <div className="hidden md:flex items-center gap-4 ml-6 pl-6 border-l border-gray-200">
+        <div 
+          className="hidden md:flex items-center gap-4 ml-6 pl-6"
+          style={{ borderLeft: `1px solid ${colors.border}` }}
+        >
           <div className="text-center">
-            <div className="text-lg font-semibold text-gray-900">{state.tasks.length}</div>
-            <div className="text-xs text-gray-500">{t('header.tasks')}</div>
+            <div className="text-lg font-semibold" style={{ color: colors.textPrimary }}>{state.tasks.length}</div>
+            <div className="text-xs" style={{ color: colors.textSecondary }}>{t('header.tasks')}</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-semibold text-gray-900">{state.people.length}</div>
-            <div className="text-xs text-gray-500">{t('header.team')}</div>
+            <div className="text-lg font-semibold" style={{ color: colors.textPrimary }}>{state.people.length}</div>
+            <div className="text-xs" style={{ color: colors.textSecondary }}>{t('header.team')}</div>
           </div>
           <div className="text-center">
-            <div className="text-lg font-semibold text-green-600">
+            <div className="text-lg font-semibold" style={{ color: colors.success }}>
               {state.tasks.filter(t => t.status === 'done').length}
             </div>
-            <div className="text-xs text-gray-500">{t('header.done')}</div>
+            <div className="text-xs" style={{ color: colors.textSecondary }}>{t('header.done')}</div>
           </div>
         </div>
       </div>
@@ -68,7 +88,8 @@ export function Header({ onOpenSettings }: HeaderProps) {
       <div className="flex items-center gap-3">
         <button
           onClick={onOpenSettings}
-          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          className="p-2 rounded-lg transition-colors hover:bg-[var(--theme-card-hover)]"
+          style={{ color: colors.textSecondary }}
           title={t('header.settings')}
         >
           <Settings size={18} />
@@ -76,7 +97,8 @@ export function Header({ onOpenSettings }: HeaderProps) {
 
         <button
           onClick={handleClearData}
-          className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+          className="p-2 rounded-lg transition-colors"
+          style={{ color: colors.textSecondary }}
           title={t('header.clearData')}
         >
           <svg
