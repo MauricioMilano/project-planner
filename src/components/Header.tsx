@@ -6,7 +6,6 @@ import { useProject } from '../context/ProjectContext';
 import { ExportModal } from './ExportModal';
 import { ImportModal } from './ImportModal';
 import { Plus, Users, Settings, Download, Upload } from 'lucide-react';
-import { LanguageSelector } from './LanguageSelector';
 
 interface HeaderProps {
   onAddTask: () => void;
@@ -87,8 +86,6 @@ export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) 
 
         {/* Actions */}
         <div className="flex items-center gap-3">
-          <LanguageSelector />
-
           <button
             onClick={onOpenSettings}
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
