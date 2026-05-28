@@ -2,7 +2,6 @@ export interface Person {
   id: string;
   name: string;
   role?: string;
-  capacity: number; // 25, 50, 75, or 100
   color: string; // auto-generated avatar color
 }
 

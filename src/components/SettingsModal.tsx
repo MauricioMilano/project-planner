@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 
 interface Settings {
-  defaultCapacity: number;
   workingDaysPerWeek: number;
   dayWidth: number;
   showWeekends: boolean;
@@ -17,7 +16,6 @@ interface SettingsModalProps {
 }
 
 const DEFAULT_SETTINGS: Settings = {
-  defaultCapacity: 100,
   workingDaysPerWeek: 5,
   dayWidth: 32,
   showWeekends: true,
@@ -43,7 +41,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   const handleSave = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
     onClose();
-    // Trigger a custom event to notify other components of settings change
     window.dispatchEvent(new CustomEvent('settingsChanged', { detail: settings }));
   };
 
@@ -69,61 +66,6 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
 
         {/* Settings Content */}
         <div className="p-6 space-y-6">
-          {/* Default Capacity */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Default Capacity for New Members
-            </label>
-            <div className="flex items-center gap-4">
-              <input
-                type="range"
-                min="25"
-                max="100"
-                step="25"
-                value={settings.defaultCapacity}
-                onChange={(e) => setSettings({ ...settings, defaultCapacity: Number(e.target.value) })}
-                className="flex-1 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#181d26]"
-              />
-              <span className="w-16 text-center font-medium text-gray-900 bg-gray-100 py-1.5 rounded-md">
-                {settings.defaultCapacity}%
-              </span>
-            </div>
-            <div className="flex justify-between text-xs text-gray-500 mt-1">
-              <span>25%</span>
-              <span>50%</span>
-              <span>75%</span>
-              <span>100%</span>
-            </div>
-            <p className="text-xs text-gray-400 mt-2">
-              This will be the default availability when adding new team members.
-            </p>
-          </div>
-
-          {/* Working Days Per Week */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Working Days Per Week
-            </label>
-            <div className="flex gap-2">
-              {[5, 6, 7].map((days) => (
-                <button
-                  key={days}
-                  onClick={() => setSettings({ ...settings, workingDaysPerWeek: days })}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors border-2 ${
-                    settings.workingDaysPerWeek === days
-                      ? 'bg-[#181d26] text-white border-[#181d26]'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  {days} days
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-gray-400 mt-2">
-              Used for calculating workload and task durations.
-            </p>
-          </div>
-
           {/* Day Width */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">

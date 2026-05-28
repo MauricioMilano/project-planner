@@ -85,17 +85,6 @@ export function calculateTaskPosition(
   return Math.max(0, daysDiff * dayWidth);
 }
 
-export function calculateWorkloadForPerson(
-  personId: string,
-  tasks: { assigneeId: string | null; duration: number }[],
-  totalCapacity: number
-): number {
-  const assignedTasks = tasks.filter(t => t.assigneeId === personId);
-  const totalDays = assignedTasks.reduce((sum, t) => sum + t.duration, 0);
-  if (totalCapacity === 0) return 0;
-  return Math.min(100, (totalDays / totalCapacity) * 100);
-}
-
 export function getInitials(name: string): string {
   const parts = name.trim().split(/\s+/);
   if (parts.length === 1) {

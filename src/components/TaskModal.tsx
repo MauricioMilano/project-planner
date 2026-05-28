@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Task, Person } from '../types';
 import { X, Trash2, Link2, AlertCircle, Clock, CheckCircle, Calendar } from 'lucide-react';
-import { formatDate, addDays, getEndDate, isValidDate } from '../hooks/useGanttCalculations';
+import { formatDate, getEndDate, isValidDate } from '../hooks/useGanttCalculations';
 
 interface TaskModalProps {
   isOpen: boolean;
@@ -75,14 +75,6 @@ export function TaskModal({
     });
   };
 
-  const handleDelete = () => {
-    if (task && confirm('Are you sure you want to delete this task?')) {
-      onSave({ ...task, id: task.id } as any);
-      // The parent will handle actual deletion via a different path
-      onClose();
-    }
-  };
-
   const toggleDependency = (taskId: string) => {
     setDependencies(prev =>
       prev.includes(taskId)
@@ -104,7 +96,12 @@ export function TaskModal({
           <div className="flex items-center gap-2">
             {task && (
               <button
-                onClick={handleDelete}
+                onClick={() => {
+                  if (confirm('Are you sure you want to delete this task?')) {
+                    onSave({ ...task, id: task.id } as any);
+                    onClose();
+                  }
+                }}
                 className="p-2 text-gray-400 hover:text-red-500 transition-colors"
                 title="Delete task"
               >

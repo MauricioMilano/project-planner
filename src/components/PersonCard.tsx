@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { Person, Task } from '../types';
-import { getInitials, calculateWorkloadForPerson } from '../hooks/useGanttCalculations';
+import { getInitials } from '../hooks/useGanttCalculations';
 import { Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { AddPersonModal } from './AddPersonModal';
 import { useProject } from '../context/ProjectContext';
-import { useSettings } from './SettingsModal';
 
 interface PersonCardProps {
   person: Person;
@@ -13,22 +12,11 @@ interface PersonCardProps {
 
 export function PersonCard({ person, tasks }: PersonCardProps) {
   const { deletePerson } = useProject();
-  const settings = useSettings();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // Calculate workload based on working days per week setting
   const assignedTasks = tasks.filter(t => t.assigneeId === person.id);
-  const totalCapacity = (person.capacity / 100) * settings.workingDaysPerWeek * 4; // Monthly capacity in days
-  const totalTaskDays = assignedTasks.reduce((sum, t) => sum + t.duration, 0);
-  const workload = totalCapacity > 0 ? Math.min(100, (totalTaskDays / totalCapacity) * 100) : 0;
-
-  const getWorkloadColor = (w: number) => {
-    if (w > 100) return 'bg-red-500';
-    if (w > 80) return 'bg-yellow-500';
-    if (w > 50) return 'bg-blue-500';
-    return 'bg-green-500';
-  };
+  const totalDays = assignedTasks.reduce((sum, t) => sum + t.duration, 0);
 
   return (
     <>
@@ -72,23 +60,14 @@ export function PersonCard({ person, tasks }: PersonCardProps) {
             </div>
 
             <div className="mt-3">
-              <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                <span>Capacity: {person.capacity}% ({settings.workingDaysPerWeek} days/week)</span>
-                <button
-                  onClick={() => setIsExpanded(!isExpanded)}
-                  className="flex items-center gap-1 hover:text-gray-700"
-                >
-                  {assignedTasks.length} task{assignedTasks.length !== 1 ? 's' : ''}
-                  {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-                </button>
-              </div>
-
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div
-                  className={`h-full rounded-full transition-all ${getWorkloadColor(workload)}`}
-                  style={{ width: `${Math.min(workload, 100)}%` }}
-                />
-              </div>
+              <button
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-700"
+              >
+                {assignedTasks.length} task{assignedTasks.length !== 1 ? 's' : ''}
+                {assignedTasks.length > 0 && ` • ${totalDays} day${totalDays !== 1 ? 's' : ''} total`}
+                {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+              </button>
 
               {isExpanded && assignedTasks.length > 0 && (
                 <div className="mt-2 space-y-1">

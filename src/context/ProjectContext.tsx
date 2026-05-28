@@ -59,7 +59,7 @@ function projectReducer(state: ProjectState, action: ProjectAction): ProjectStat
 interface ProjectContextType {
   state: ProjectState;
   dispatch: React.Dispatch<ProjectAction>;
-  addPerson: (name: string, role?: string, capacity?: number) => Person;
+  addPerson: (name: string, role?: string) => Person;
   updatePerson: (person: Person) => void;
   deletePerson: (id: string) => void;
   addTask: (task: Omit<Task, 'id'>) => Task;
@@ -96,12 +96,11 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     return () => clearTimeout(timeoutId);
   }, [state]);
 
-  const addPerson = useCallback((name: string, role?: string, capacity: number = 100): Person => {
+  const addPerson = useCallback((name: string, role?: string): Person => {
     const person: Person = {
       id: crypto.randomUUID(),
       name,
       role,
-      capacity,
       color: getAvatarColor(name),
     };
     dispatch({ type: 'ADD_PERSON', payload: person });

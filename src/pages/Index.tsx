@@ -17,16 +17,7 @@ function ProjectPlannerApp() {
   const [isAddTaskOpen, setIsAddTaskOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [newTaskDate, setNewTaskDate] = useState<string | null>(null);
-  const settings = useSettings();
-
-  // Listen for settings changes to update default capacity for AddPersonModal
-  useEffect(() => {
-    const handleSettingsChange = () => {
-      // Trigger re-render or state update if needed
-    };
-    window.addEventListener('settingsChanged', handleSettingsChange);
-    return () => window.removeEventListener('settingsChanged', handleSettingsChange);
-  }, []);
+  useSettings();
 
   const handleAddTask = () => {
     setNewTaskDate(null);
