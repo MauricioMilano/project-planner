@@ -10,9 +10,10 @@ interface GanttRowProps {
   onUpdate: (task: Task) => void;
   onClick: () => void;
   isEven: boolean;
+  showWeekends?: boolean;
 }
 
-export function GanttRow({ task, person, projectStartDate, dayWidth, onUpdate, onClick, isEven }: GanttRowProps) {
+export function GanttRow({ task, person, projectStartDate, dayWidth, onUpdate, onClick, isEven, showWeekends = true }: GanttRowProps) {
   return (
     <div
       className={`flex border-b border-gray-100 ${

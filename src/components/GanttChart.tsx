@@ -6,16 +6,19 @@ import { TaskModal } from './TaskModal';
 import { differenceInDays, addDays } from '../hooks/useGanttCalculations';
 import { Plus, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Task } from '../types';
+import { useSettings } from './SettingsModal';
 
-const DAY_WIDTH = 32;
 const MIN_TASKS_VISIBLE = 10;
 
 export function GanttChart() {
   const { state, updateTask, addTask } = useProject();
+  const settings = useSettings();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTaskDate, setNewTaskDate] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const dayWidth = settings.dayWidth;
 
   // Calculate project timeline
   const { projectStartDate, projectEndDate, totalDays } = useMemo(() => {
@@ -54,10 +57,10 @@ export function GanttChart() {
   const handleEmptyClick = (e: React.MouseEvent) => {
     const rect = e.currentTarget.getBoundingClientRect();
     const scrollLeft = scrollRef.current?.scrollLeft || 0;
-    const x = e.clientX - rect.left + scrollLeft - 192; // Subtract sidebar width
+    const x = e.clientX - rect.left + scrollLeft - 192;
     
     if (x > 0) {
-      const dayOffset = Math.floor(x / DAY_WIDTH);
+      const dayOffset = Math.floor(x / dayWidth);
       const clickedDate = addDays(projectStartDate, dayOffset);
       setNewTaskDate(clickedDate);
       setSelectedTask(null);
@@ -92,7 +95,7 @@ export function GanttChart() {
     if (scrollRef.current) {
       const today = new Date().toISOString().split('T')[0];
       const daysUntilToday = differenceInDays(projectStartDate, today);
-      const scrollPosition = Math.max(0, daysUntilToday * DAY_WIDTH - 200);
+      const scrollPosition = Math.max(0, daysUntilToday * dayWidth - 200);
       scrollRef.current.scrollLeft = scrollPosition;
     }
   };
@@ -185,13 +188,13 @@ export function GanttChart() {
           className="flex-1 overflow-x-auto overflow-y-auto"
           onClick={handleEmptyClick}
         >
-          <div style={{ width: totalDays * DAY_WIDTH, minWidth: '100%' }}>
+          <div style={{ width: totalDays * dayWidth, minWidth: '100%' }}>
             {/* Month headers */}
             <div className="sticky top-0 z-10">
               <GanttHeader
                 projectStartDate={projectStartDate}
                 projectEndDate={projectEndDate}
-                dayWidth={DAY_WIDTH}
+                dayWidth={dayWidth}
               />
             </div>
 
@@ -238,7 +241,7 @@ export function GanttChart() {
                     task={task}
                     person={getPersonById(task.assigneeId)}
                     projectStartDate={projectStartDate}
-                    dayWidth={DAY_WIDTH}
+                    dayWidth={dayWidth}
                     onUpdate={updateTask}
                     onClick={() => handleTaskClick(task)}
                     isEven={index % 2 === 0}

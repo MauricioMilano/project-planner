@@ -4,6 +4,7 @@ import { getInitials, calculateWorkloadForPerson } from '../hooks/useGanttCalcul
 import { Pencil, Trash2, ChevronDown, ChevronUp } from 'lucide-react';
 import { AddPersonModal } from './AddPersonModal';
 import { useProject } from '../context/ProjectContext';
+import { useSettings } from './SettingsModal';
 
 interface PersonCardProps {
   person: Person;
@@ -12,11 +13,15 @@ interface PersonCardProps {
 
 export function PersonCard({ person, tasks }: PersonCardProps) {
   const { deletePerson } = useProject();
+  const settings = useSettings();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   
-  const workload = calculateWorkloadForPerson(person.id, tasks, person.capacity);
+  // Calculate workload based on working days per week setting
   const assignedTasks = tasks.filter(t => t.assigneeId === person.id);
+  const totalCapacity = (person.capacity / 100) * settings.workingDaysPerWeek * 4; // Monthly capacity in days
+  const totalTaskDays = assignedTasks.reduce((sum, t) => sum + t.duration, 0);
+  const workload = totalCapacity > 0 ? Math.min(100, (totalTaskDays / totalCapacity) * 100) : 0;
 
   const getWorkloadColor = (w: number) => {
     if (w > 100) return 'bg-red-500';
@@ -68,7 +73,7 @@ export function PersonCard({ person, tasks }: PersonCardProps) {
 
             <div className="mt-3">
               <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                <span>Capacity: {person.capacity}%</span>
+                <span>Capacity: {person.capacity}% ({settings.workingDaysPerWeek} days/week)</span>
                 <button
                   onClick={() => setIsExpanded(!isExpanded)}
                   className="flex items-center gap-1 hover:text-gray-700"
