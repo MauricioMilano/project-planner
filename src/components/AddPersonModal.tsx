@@ -1,8 +1,11 @@
-import React, { useState } from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import { useProject } from '../context/ProjectContext';
 import { Person } from '../types';
 import { getInitials } from '../hooks/useGanttCalculations';
 import { X } from 'lucide-react';
+import { useSettings } from './SettingsModal';
 
 interface AddPersonModalProps {
   isOpen: boolean;
@@ -12,11 +15,12 @@ interface AddPersonModalProps {
 
 export function AddPersonModal({ isOpen, onClose, editPerson }: AddPersonModalProps) {
   const { addPerson, updatePerson } = useProject();
-  const [name, setName] = useState(editPerson?.name || '');
-  const [role, setRole] = useState(editPerson?.role || '');
-  const [capacity, setCapacity] = useState(editPerson?.capacity || 100);
+  const settings = useSettings();
+  const [name, setName] = useState('');
+  const [role, setRole] = useState('');
+  const [capacity, setCapacity] = useState(settings.defaultCapacity);
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (editPerson) {
       setName(editPerson.name);
       setRole(editPerson.role || '');
@@ -24,9 +28,9 @@ export function AddPersonModal({ isOpen, onClose, editPerson }: AddPersonModalPr
     } else {
       setName('');
       setRole('');
-      setCapacity(100);
+      setCapacity(settings.defaultCapacity);
     }
-  }, [editPerson, isOpen]);
+  }, [editPerson, isOpen, settings.defaultCapacity]);
 
   if (!isOpen) return null;
 
@@ -52,6 +56,7 @@ export function AddPersonModal({ isOpen, onClose, editPerson }: AddPersonModalPr
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">
+>>>>>>> REPLACE
             {editPerson ? 'Edit Team Member' : 'Add Team Member'}
           </h2>
           <button

@@ -1,14 +1,17 @@
+"use client";
+
 import React from 'react';
 import { useProject } from '../context/ProjectContext';
 import { ExportButton } from './ExportButton';
-import { Plus, Users, FileDown } from 'lucide-react';
+import { Plus, Users, FileDown, Settings } from 'lucide-react';
 
 interface HeaderProps {
   onAddTask: () => void;
   onAddPerson: () => void;
+  onOpenSettings: () => void;
 }
 
-export function Header({ onAddTask, onAddPerson }: HeaderProps) {
+export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) {
   const { state } = useProject();
 
   return (
@@ -57,6 +60,14 @@ export function Header({ onAddTask, onAddPerson }: HeaderProps) {
 
       {/* Actions */}
       <div className="flex items-center gap-3">
+        <button
+          onClick={onOpenSettings}
+          className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          title="Settings"
+        >
+          <Settings size={18} />
+        </button>
+
         <button
           onClick={onAddPerson}
           className="hidden sm:flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
