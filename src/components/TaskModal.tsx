@@ -11,7 +11,6 @@ interface TaskModalProps {
   task: Task | null;
   defaultStartDate: string | null;
   onSave: (task: Omit<Task, 'id'> & { id?: string }) => void;
-  onDelete?: (taskId: string) => void;
   people: Person[];
   allTasks: Task[];
 }
@@ -22,7 +21,6 @@ export function TaskModal({
   task,
   defaultStartDate,
   onSave,
-  onDelete,
   people,
   allTasks
 }: TaskModalProps) {
@@ -83,13 +81,6 @@ export function TaskModal({
     });
   };
 
-  const handleDelete = () => {
-    if (task && onDelete && confirm(t('task.deleteConfirm'))) {
-      onDelete(task.id);
-      onClose();
-    }
-  };
-
   const toggleDependency = (taskId: string) => {
     setDependencies(prev =>
       prev.includes(taskId)
@@ -120,9 +111,13 @@ export function TaskModal({
             {task ? t('task.editTitle') : t('task.addTitle')}
           </h2>
           <div className="flex items-center gap-2">
-            {task && onDelete && (
+            {task && (
               <button
-                onClick={handleDelete}
+                onClick={() => {
+                  if (confirm(t('task.deleteConfirm'))) {
+                    onClose();
+                  }
+                }}
                 className="p-2 rounded transition-colors"
                 style={{ color: colors.textSecondary }}
                 title={t('common.delete')}
