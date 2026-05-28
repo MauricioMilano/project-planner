@@ -3,7 +3,8 @@
 import React, { useState } from 'react';
 import { useProject } from '../context/ProjectContext';
 import { ExportModal } from './ExportModal';
-import { Plus, Users, Settings, Download } from 'lucide-react';
+import { ImportModal } from './ImportModal';
+import { Plus, Users, Settings, Download, Upload } from 'lucide-react';
 
 interface HeaderProps {
   onAddTask: () => void;
@@ -12,8 +13,22 @@ interface HeaderProps {
 }
 
 export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) {
-  const { state } = useProject();
+  const { state, dispatch } = useProject();
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isImportOpen, setIsImportOpen] = useState(false);
+
+  const handleImport = (data: { people: any[]; tasks: any[] }) => {
+    if (confirm('This will replace all current data. Continue?')) {
+      dispatch({
+        type: 'LOAD_STATE',
+        payload: {
+          people: data.people,
+          tasks: data.tasks,
+          projectStartDate: new Date().toISOString().split('T')[0]
+        }
+      });
+    }
+  };
 
   return (
     <>
@@ -87,6 +102,14 @@ export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) 
           </button>
 
           <button
+            onClick={() => setIsImportOpen(true)}
+            className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
+          >
+            <Upload size={16} />
+            Import
+          </button>
+
+          <button
             onClick={() => setIsExportOpen(true)}
             className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
           >
@@ -124,6 +147,12 @@ export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) 
       <ExportModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
+      />
+
+      <ImportModal
+        isOpen={isImportOpen}
+        onClose={() => setIsImportOpen(false)}
+        onImport={handleImport}
       />
     </>
   );
