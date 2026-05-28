@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProject } from '../context/ProjectContext';
 import { Person } from '../types';
-import { getInitials } from '../hooks/useGanttCalculations';
 import { X } from 'lucide-react';
 
 interface AddPersonModalProps {
@@ -13,6 +13,7 @@ interface AddPersonModalProps {
 }
 
 export function AddPersonModal({ isOpen, onClose, editPerson }: AddPersonModalProps) {
+  const { t } = useTranslation();
   const { addPerson, updatePerson } = useProject();
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
@@ -50,7 +51,7 @@ export function AddPersonModal({ isOpen, onClose, editPerson }: AddPersonModalPr
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
         <div className="flex items-center justify-between p-4 border-b border-gray-200">
           <h2 className="text-lg font-medium text-gray-900">
-            {editPerson ? 'Edit Team Member' : 'Add Team Member'}
+            {editPerson ? t('addPerson.editTitle') : t('addPerson.title')}
           </h2>
           <button
             onClick={onClose}
@@ -63,13 +64,13 @@ export function AddPersonModal({ isOpen, onClose, editPerson }: AddPersonModalPr
         <form onSubmit={handleSubmit} className="p-4 space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Name <span className="text-red-500">*</span>
+              {t('addPerson.nameLabel')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Sarah Chen"
+              placeholder={t('addPerson.namePlaceholder')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             />
@@ -77,13 +78,13 @@ export function AddPersonModal({ isOpen, onClose, editPerson }: AddPersonModalPr
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Role (optional)
+              {t('addPerson.roleLabel')}
             </label>
             <input
               type="text"
               value={role}
               onChange={(e) => setRole(e.target.value)}
-              placeholder="Product Manager"
+              placeholder={t('addPerson.rolePlaceholder')}
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
@@ -94,13 +95,13 @@ export function AddPersonModal({ isOpen, onClose, editPerson }: AddPersonModalPr
               onClick={onClose}
               className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               className="flex-1 px-4 py-2 bg-[#181d26] text-white rounded-lg font-medium hover:bg-[#0d1218] transition-colors"
             >
-              {editPerson ? 'Save Changes' : 'Add Member'}
+              {editPerson ? t('addPerson.saveChanges') : t('addPerson.addMember')}
             </button>
           </div>
         </form>

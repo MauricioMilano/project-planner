@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProject } from '../context/ProjectContext';
 import { PersonCard } from './PersonCard';
 import { AddPersonModal } from './AddPersonModal';
 import { Plus } from 'lucide-react';
 
 export function PeoplePanel() {
+  const { t } = useTranslation();
   const { state } = useProject();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -13,7 +15,7 @@ export function PeoplePanel() {
       <div className="p-4 border-b border-gray-200 bg-white">
         <div className="flex items-center justify-between">
           <h2 className="text-sm font-medium text-gray-900 uppercase tracking-wide">
-            Team
+            {t('peoplePanel.title')}
           </h2>
           <span className="text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
             {state.people.length}
@@ -39,9 +41,9 @@ export function PeoplePanel() {
                 />
               </svg>
             </div>
-            <p className="text-sm text-gray-500 mb-1">No team members yet</p>
+            <p className="text-sm text-gray-500 mb-1">{t('peoplePanel.noMembers')}</p>
             <p className="text-xs text-gray-400">
-              Add people to assign them tasks
+              {t('peoplePanel.noMembersHint')}
             </p>
           </div>
         ) : (
@@ -61,7 +63,7 @@ export function PeoplePanel() {
           className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 font-medium hover:border-gray-400 hover:text-gray-700 transition-colors"
         >
           <Plus size={18} />
-          Add Person
+          {t('peoplePanel.addPerson')}
         </button>
       </div>
 

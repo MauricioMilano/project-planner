@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, FileDown, FileSpreadsheet, FileJson, FileText, Loader2 } from 'lucide-react';
 import { useProject } from '../context/ProjectContext';
 
@@ -13,39 +14,40 @@ type ExportFormat = 'pdf' | 'csv' | 'json' | 'markdown';
 
 interface ExportOption {
   id: ExportFormat;
-  label: string;
-  description: string;
+  labelKey: string;
+  descKey: string;
   icon: React.ReactNode;
 }
 
 const exportOptions: ExportOption[] = [
   {
     id: 'pdf',
-    label: 'PDF Report',
-    description: 'Visual report with tables and cards, ideal for printing',
+    labelKey: 'export.pdf',
+    descKey: 'export.pdfDesc',
     icon: <FileDown size={24} className="text-red-600" />
   },
   {
     id: 'csv',
-    label: 'CSV Spreadsheet',
-    description: 'Task data for analysis in Excel or Google Sheets',
+    labelKey: 'export.csv',
+    descKey: 'export.csvDesc',
     icon: <FileSpreadsheet size={24} className="text-green-600" />
   },
   {
     id: 'json',
-    label: 'JSON Backup',
-    description: 'Complete data export for backups or integrations',
+    labelKey: 'export.json',
+    descKey: 'export.jsonDesc',
     icon: <FileJson size={24} className="text-blue-600" />
   },
   {
     id: 'markdown',
-    label: 'Markdown',
-    description: 'Documentation format for wikis and readmes',
+    labelKey: 'export.markdown',
+    descKey: 'export.markdownDesc',
     icon: <FileText size={24} className="text-purple-600" />
   }
 ];
 
 export function ExportModal({ isOpen, onClose }: ExportModalProps) {
+  const { t, i18n } = useTranslation();
   const { state } = useProject();
   const [exporting, setExporting] = useState<ExportFormat | null>(null);
 
@@ -57,30 +59,25 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
     try {
       switch (format) {
         case 'pdf':
-          await exportToPDF(state);
+          await exportToPDF(state, t, i18n.language);
           break;
         case 'csv':
-          await exportToCSV(state);
+          await exportToCSV(state, t);
           break;
         case 'json':
           await exportToJSON(state);
           break;
         case 'markdown':
-          await exportToMarkdown(state);
+          await exportToMarkdown(state, t, i18n.language);
           break;
       }
     } catch (error) {
       console.error('Export failed:', error);
-      alert('Export failed. Please try again.');
+      alert(t('export.exportFailed'));
     } finally {
       setExporting(null);
       onClose();
     }
-  };
-
-  const getFileName = (format: string) => {
-    const date = new Date().toISOString().split('T')[0];
-    return `project-planner-${date}.${format}`;
   };
 
   return (
@@ -89,7 +86,7 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
-            Export Project
+            {t('export.title')}
           </h2>
           <button
             onClick={onClose}
@@ -116,8 +113,8 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
                 )}
               </div>
               <div className="flex-1 text-left">
-                <div className="font-medium text-gray-900">{option.label}</div>
-                <div className="text-sm text-gray-500">{option.description}</div>
+                <div className="font-medium text-gray-900">{t(option.labelKey)}</div>
+                <div className="text-sm text-gray-500">{t(option.descKey)}</div>
               </div>
             </button>
           ))}
@@ -126,7 +123,7 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
         {/* Footer */}
         <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
           <p className="text-xs text-gray-400 text-center">
-            {state.tasks.length} tasks • {state.people.length} team members
+            {state.tasks.length} {t('export.taskCount')} • {state.people.length} {t('export.teamMembers')}
           </p>
         </div>
       </div>
@@ -134,19 +131,13 @@ export function ExportModal({ isOpen, onClose }: ExportModalProps) {
   );
 }
 
-// Export functions
-async function exportToPDF(state: any) {
+// Export functions with translations
+async function exportToPDF(state: any, t: any, lang: string) {
   const people = state.people || [];
   const tasks = state.tasks || [];
 
-  const printWindow = window.open('', '_blank');
-  if (!printWindow) {
-    alert('Please allow popups to export PDF');
-    return;
-  }
-
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    return new Date(dateStr).toLocaleDateString(lang === 'pt-BR' ? 'pt-BR' : 'en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -154,11 +145,25 @@ async function exportToPDF(state: any) {
     });
   };
 
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) {
+    alert('Please allow popups to export PDF');
+    return;
+  }
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'done': return t('status.done');
+      case 'in-progress': return t('status.in-progress');
+      default: return t('status.todo');
+    }
+  };
+
   printWindow.document.write(`
     <!DOCTYPE html>
     <html>
     <head>
-      <title>Project Planner - Export</title>
+      <title>${t('header.title')} - Export</title>
       <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { 
@@ -214,18 +219,18 @@ async function exportToPDF(state: any) {
       </style>
     </head>
     <body>
-      <h1>Project Planner</h1>
-      <p class="subtitle">Generated on ${formatDate(new Date().toISOString())}</p>
+      <h1>${t('header.title')}</h1>
+      <p class="subtitle">${formatDate(new Date().toISOString())}</p>
 
       <div class="section">
-        <div class="section-title">Team Members (${people.length})</div>
+        <div class="section-title">${t('export.teamMembers')} (${people.length})</div>
         ${people.length > 0 ? `
           <div class="team-grid">
             ${people.map((p: any) => `
               <div class="person-card">
                 <div class="person-name">${p.name}</div>
                 ${p.role ? `<div class="person-role">${p.role}</div>` : ''}
-                <div class="person-capacity">Capacity assigned</div>
+                <div class="person-capacity">${t('peoplePanel.title')}</div>
               </div>
             `).join('')}
           </div>
@@ -233,17 +238,17 @@ async function exportToPDF(state: any) {
       </div>
 
       <div class="section">
-        <div class="section-title">Tasks (${tasks.length})</div>
+        <div class="section-title">${t('export.taskCount')} (${tasks.length})</div>
         ${tasks.length > 0 ? `
           <table>
             <thead>
               <tr>
-                <th>Task</th>
-                <th>Assignee</th>
-                <th>Start Date</th>
-                <th>Duration</th>
-                <th>Priority</th>
-                <th>Status</th>
+                <th>${t('task.taskNameLabel')}</th>
+                <th>${t('task.assigneeLabel')}</th>
+                <th>${t('task.startDate')}</th>
+                <th>${t('task.duration')}</th>
+                <th>${t('task.priority')}</th>
+                <th>${t('task.status')}</th>
               </tr>
             </thead>
             <tbody>
@@ -254,9 +259,9 @@ async function exportToPDF(state: any) {
                     <td>${t.name}</td>
                     <td>${assignee ? assignee.name : '—'}</td>
                     <td>${formatDate(t.startDate)}</td>
-                    <td>${t.duration} day${t.duration !== 1 ? 's' : ''}</td>
-                    <td><span class="badge badge-${t.priority}">${t.priority}</span></td>
-                    <td><span class="badge badge-${t.status === 'in-progress' ? 'progress' : t.status}">${t.status === 'in-progress' ? 'In Progress' : t.status === 'done' ? 'Done' : 'To Do'}</span></td>
+                    <td>${t.duration} ${t.duration !== 1 ? t('days.other') : t('days.one')}</td>
+                    <td><span class="badge badge-${t.priority}">${t(`priority.${t.priority}`)}</span></td>
+                    <td><span class="badge badge-${t.status === 'in-progress' ? 'progress' : t.status}">${getStatusLabel(t.status)}</span></td>
                   </tr>
                 `;
               }).join('')}
@@ -265,7 +270,7 @@ async function exportToPDF(state: any) {
         ` : '<p>No tasks added yet.</p>'}
       </div>
 
-      <div class="footer">Generated by Project Planner</div>
+      <div class="footer">${t('header.title')}</div>
 
       <script>
         window.onload = function() {
@@ -279,21 +284,29 @@ async function exportToPDF(state: any) {
   printWindow.document.close();
 }
 
-async function exportToCSV(state: any) {
+async function exportToCSV(state: any, t: any) {
   const people = state.people || [];
   const tasks = state.tasks || [];
 
-  const headers = ['Task Name', 'Assignee', 'Start Date', 'Duration (days)', 'Priority', 'Status', 'Notes'];
-  const rows = tasks.map((t: any) => {
-    const assignee = people.find((p: any) => p.id === t.assigneeId);
+  const headers = [
+    t('task.taskNameLabel'),
+    t('task.assigneeLabel'),
+    t('task.startDate'),
+    t('task.duration'),
+    t('task.priority'),
+    t('task.status'),
+    t('task.notesLabel')
+  ];
+  const rows = tasks.map((task: any) => {
+    const assignee = people.find((p: any) => p.id === task.assigneeId);
     return [
-      `"${t.name}"`,
+      `"${task.name}"`,
       `"${assignee ? assignee.name : ''}"`,
-      t.startDate,
-      t.duration,
-      t.priority,
-      t.status,
-      `"${t.notes || ''}"`
+      task.startDate,
+      task.duration,
+      t(`priority.${task.priority}`),
+      t(`status.${task.status}`),
+      `"${task.notes || ''}"`
     ].join(',');
   });
 
@@ -313,43 +326,38 @@ async function exportToJSON(state: any) {
   downloadFile(json, 'application/json', 'project-planner-backup.json');
 }
 
-async function exportToMarkdown(state: any) {
+async function exportToMarkdown(state: any, t: any, lang: string) {
   const people = state.people || [];
   const tasks = state.tasks || [];
 
   const formatDate = (dateStr: string) => {
-    return new Date(dateStr).toLocaleDateString('en-US', {
+    return new Date(dateStr).toLocaleDateString(lang === 'pt-BR' ? 'pt-BR' : 'en-US', {
       year: 'numeric',
       month: 'short',
       day: 'numeric'
     });
   };
 
-  const md = `# Project Planner
+  const md = `# ${t('header.title')}
 
-Exported on ${new Date().toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  })}
+${formatDate(new Date().toISOString())}
 
-## Team Members (${people.length})
+## ${t('export.teamMembers')} (${people.length})
 
 ${people.length > 0 ? people.map((p: any) => `- **${p.name}**${p.role ? ` - ${p.role}` : ''}`).join('\n') : '_No team members yet_'}
 
-## Tasks (${tasks.length})
+## ${t('export.taskCount')} (${tasks.length})
 
-| Task | Assignee | Start Date | Duration | Priority | Status |
+| ${t('task.taskNameLabel')} | ${t('task.assigneeLabel')} | ${t('task.startDate')} | ${t('task.duration')} | ${t('task.priority')} | ${t('task.status')} |
 |------|----------|------------|----------|----------|--------|
-${tasks.length > 0 ? tasks.map((t: any) => {
-  const assignee = people.find((p: any) => p.id === t.assigneeId);
-  return `| ${t.name} | ${assignee ? assignee.name : '—'} | ${formatDate(t.startDate)} | ${t.duration}d | ${t.priority} | ${t.status} |`;
+${tasks.length > 0 ? tasks.map((task: any) => {
+  const assignee = people.find((p: any) => p.id === task.assigneeId);
+  return `| ${task.name} | ${assignee ? assignee.name : '—'} | ${formatDate(task.startDate)} | ${task.duration}d | ${t(`priority.${task.priority}`)} | ${t(`status.${task.status}`)} |`;
 }).join('\n') : '|_No tasks yet_|'}
 
 ---
 
-_Generated by Project Planner_
+_${t('header.title')}_
 `;
 
   downloadFile(md, 'text/markdown', 'project-planner-report.md');

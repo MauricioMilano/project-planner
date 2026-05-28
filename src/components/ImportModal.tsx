@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X, Upload, FileJson, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 
 interface ImportModalProps {
@@ -22,6 +23,7 @@ interface ValidationResult {
 }
 
 export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
+  const { t } = useTranslation();
   const [importing, setImporting] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
@@ -39,11 +41,11 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
       // Check structure
       if (!data.people || !Array.isArray(data.people)) {
-        errors.push('Invalid format: "people" array is required');
+        errors.push(t('import.missingPeople'));
       }
 
       if (!data.tasks || !Array.isArray(data.tasks)) {
-        errors.push('Invalid format: "tasks" array is required');
+        errors.push(t('import.missingTasks'));
       }
 
       if (errors.length > 0) {
@@ -53,32 +55,32 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
       // Validate people
       data.people.forEach((person: any, index: number) => {
         if (!person.id) {
-          errors.push(`Person ${index + 1}: missing "id"`);
+          errors.push(`Person ${index + 1}: ${t('import.missingId')}`);
         }
         if (!person.name) {
-          errors.push(`Person ${index + 1}: missing "name"`);
+          errors.push(`Person ${index + 1}: ${t('import.missingName')}`);
         }
         if (!person.color) {
-          warnings.push(`Person ${index + 1}: missing "color", will be auto-generated`);
+          warnings.push(`Person ${index + 1}: ${t('import.missingColor')}`);
         }
       });
 
       // Validate tasks
       data.tasks.forEach((task: any, index: number) => {
         if (!task.id) {
-          errors.push(`Task ${index + 1}: missing "id"`);
+          errors.push(`Task ${index + 1}: ${t('import.missingId')}`);
         }
         if (!task.name) {
-          errors.push(`Task ${index + 1}: missing "name"`);
+          errors.push(`Task ${index + 1}: ${t('import.missingName')}`);
         }
         if (!task.startDate) {
-          errors.push(`Task ${index + 1}: missing "startDate"`);
+          errors.push(`Task ${index + 1}: ${t('import.missingStartDate')}`);
         }
         if (typeof task.duration !== 'number' || task.duration < 1) {
-          errors.push(`Task ${index + 1}: invalid "duration"`);
+          errors.push(`Task ${index + 1}: ${t('import.invalidDuration')}`);
         }
         if (task.assigneeId && !data.people.find((p: any) => p.id === task.assigneeId)) {
-          warnings.push(`Task ${index + 1}: assignee not found in people list`);
+          warnings.push(`Task ${index + 1}: ${t('import.assigneeNotFound')}`);
         }
       });
 
@@ -92,7 +94,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     } catch (e) {
       return {
         valid: false,
-        errors: ['Invalid JSON format. Please check the file content.'],
+        errors: [t('import.invalidJson')],
         warnings: []
       };
     }
@@ -100,7 +102,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
 
   const handleFile = async (file: File) => {
     if (!file.name.endsWith('.json')) {
-      alert('Please select a JSON file');
+      alert(t('import.invalidFile'));
       return;
     }
 
@@ -114,7 +116,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
     } catch (error) {
       setValidationResult({
         valid: false,
-        errors: ['Failed to read file. Please try again.'],
+        errors: [t('import.failedRead')],
         warnings: []
       });
     } finally {
@@ -160,7 +162,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
-            Import Project
+            {t('import.title')}
           </h2>
           <button
             onClick={handleClose}
@@ -198,17 +200,17 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                 </div>
                 
                 <p className="text-gray-700 font-medium mb-1">
-                  Drop your JSON file here
+                  {t('import.dropzoneTitle')}
                 </p>
                 <p className="text-sm text-gray-500 mb-4">
-                  or click to browse
+                  {t('import.orClick')}
                 </p>
                 
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="px-4 py-2 bg-[#181d26] text-white rounded-lg text-sm font-medium hover:bg-[#0d1218] transition-colors"
                 >
-                  Select File
+                  {t('import.selectFile')}
                 </button>
               </div>
 
@@ -218,10 +220,10 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                   <FileJson size={20} className="text-blue-500 mt-0.5" />
                   <div>
                     <p className="text-sm font-medium text-gray-700">
-                      JSON Backup Format
+                      {t('import.jsonFormat')}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">
-                      Import a previously exported JSON backup file. This will replace all current data.
+                      {t('import.jsonFormatDesc')}
                     </p>
                   </div>
                 </div>
@@ -230,7 +232,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
           ) : importing ? (
             <div className="text-center py-8">
               <Loader2 size={32} className="mx-auto text-gray-400 animate-spin mb-4" />
-              <p className="text-gray-600">Reading file...</p>
+              <p className="text-gray-600">{t('import.readingFile')}</p>
             </div>
           ) : validationResult ? (
             <div className="space-y-4">
@@ -254,13 +256,13 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                     <div className="text-lg font-semibold text-gray-900">
                       {validationResult.data.people.length}
                     </div>
-                    <div className="text-xs text-gray-500">People</div>
+                    <div className="text-xs text-gray-500">{t('import.people')}</div>
                   </div>
                   <div className="flex-1 p-3 bg-gray-50 rounded-lg text-center">
                     <div className="text-lg font-semibold text-gray-900">
                       {validationResult.data.tasks.length}
                     </div>
-                    <div className="text-xs text-gray-500">Tasks</div>
+                    <div className="text-xs text-gray-500">{t('import.tasks')}</div>
                   </div>
                 </div>
               )}
@@ -271,7 +273,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                   <div className="flex items-center gap-2 mb-2">
                     <AlertCircle size={16} className="text-red-500" />
                     <span className="text-sm font-medium text-red-700">
-                      Validation Errors
+                      {t('import.validationErrors')}
                     </span>
                   </div>
                   <ul className="text-xs text-red-600 space-y-1">
@@ -288,7 +290,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                   <div className="flex items-center gap-2 mb-2">
                     <AlertCircle size={16} className="text-yellow-500" />
                     <span className="text-sm font-medium text-yellow-700">
-                      Warnings
+                      {t('import.warnings')}
                     </span>
                   </div>
                   <ul className="text-xs text-yellow-600 space-y-1">
@@ -305,7 +307,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                   <div className="flex items-center gap-2">
                     <CheckCircle size={16} className="text-green-500" />
                     <span className="text-sm font-medium text-green-700">
-                      File is valid and ready to import
+                      {t('import.validReady')}
                     </span>
                   </div>
                 </div>
@@ -320,14 +322,14 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
                   }}
                   className="flex-1 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
                 >
-                  Choose Different File
+                  {t('import.chooseDifferent')}
                 </button>
                 {validationResult.valid && (
                   <button
                     onClick={handleImport}
                     className="flex-1 py-2.5 bg-[#181d26] text-white rounded-lg font-medium hover:bg-[#0d1218] transition-colors"
                   >
-                    Import Data
+                    {t('import.importData')}
                   </button>
                 )}
               </div>
@@ -339,7 +341,7 @@ export function ImportModal({ isOpen, onClose, onImport }: ImportModalProps) {
         <div className="px-6 py-3 border-t border-gray-200 bg-amber-50">
           <p className="text-xs text-amber-700 flex items-center gap-1.5">
             <AlertCircle size={14} />
-            Importing will replace all current project data
+            {t('import.importWarning')}
           </p>
         </div>
       </div>

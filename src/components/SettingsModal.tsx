@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { X } from 'lucide-react';
+import { LanguageSelector } from './LanguageSelector';
 
 interface Settings {
   workingDaysPerWeek: number;
@@ -25,6 +27,7 @@ const DEFAULT_SETTINGS: Settings = {
 const STORAGE_KEY = 'project-planner-settings';
 
 export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
+  const { t } = useTranslation();
   const [settings, setSettings] = useState<Settings>(DEFAULT_SETTINGS);
 
   useEffect(() => {
@@ -55,7 +58,7 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">Settings</h2>
+          <h2 className="text-lg font-semibold text-gray-900">{t('settings.title')}</h2>
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -69,29 +72,42 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {/* Day Width */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Timeline Zoom: {settings.dayWidth}px per day
+              {t('settings.dayWidthLabel')}: {settings.dayWidth}px
             </label>
             <div className="flex gap-2">
-              {[
-                { value: 24, label: 'Compact' },
-                { value: 32, label: 'Normal' },
-                { value: 48, label: 'Spacious' },
-              ].map(({ value, label }) => (
-                <button
-                  key={value}
-                  onClick={() => setSettings({ ...settings, dayWidth: value })}
-                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors border-2 ${
-                    settings.dayWidth === value
-                      ? 'bg-[#181d26] text-white border-[#181d26]'
-                      : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
+              <button
+                onClick={() => setSettings({ ...settings, dayWidth: 24 })}
+                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors border-2 ${
+                  settings.dayWidth === 24
+                    ? 'bg-[#181d26] text-white border-[#181d26]'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {t('settings.dayWidthCompact')}
+              </button>
+              <button
+                onClick={() => setSettings({ ...settings, dayWidth: 32 })}
+                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors border-2 ${
+                  settings.dayWidth === 32
+                    ? 'bg-[#181d26] text-white border-[#181d26]'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {t('settings.dayWidthNormal')}
+              </button>
+              <button
+                onClick={() => setSettings({ ...settings, dayWidth: 48 })}
+                className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors border-2 ${
+                  settings.dayWidth === 48
+                    ? 'bg-[#181d26] text-white border-[#181d26]'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                {t('settings.dayWidthSpacious')}
+              </button>
             </div>
             <p className="text-xs text-gray-400 mt-2">
-              Adjust how much space each day takes in the Gantt chart.
+              {t('settings.dayWidthDesc')}
             </p>
           </div>
 
@@ -99,10 +115,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <div className="flex items-center justify-between">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Show Weekends
+                {t('settings.showWeekends')}
               </label>
               <p className="text-xs text-gray-400 mt-0.5">
-                Display Saturday and Sunday in the timeline
+                {t('settings.showWeekendsDesc')}
               </p>
             </div>
             <button
@@ -123,10 +139,10 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           <div className="flex items-center justify-between">
             <div>
               <label className="block text-sm font-medium text-gray-700">
-                Auto-calculate End Date
+                {t('settings.autoCalculate')}
               </label>
               <p className="text-xs text-gray-400 mt-0.5">
-                Automatically set task end date based on duration
+                {t('settings.autoCalculateDesc')}
               </p>
             </div>
             <button
@@ -142,6 +158,14 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
               />
             </button>
           </div>
+
+          {/* Language Section */}
+          <div className="pt-4 border-t border-gray-200">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {t('settings.languageLabel')}
+            </label>
+            <LanguageSelector />
+          </div>
         </div>
 
         {/* Footer */}
@@ -150,20 +174,20 @@ export function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
             onClick={handleReset}
             className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors"
           >
-            Reset Defaults
+            {t('settings.resetDefaults')}
           </button>
           <div className="flex-1" />
           <button
             onClick={onClose}
             className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors"
           >
-            Cancel
+            {t('common.cancel')}
           </button>
           <button
             onClick={handleSave}
             className="px-4 py-2 bg-[#181d26] text-white rounded-lg font-medium hover:bg-[#0d1218] transition-colors"
           >
-            Save Settings
+            {t('settings.saveSettings')}
           </button>
         </div>
       </div>

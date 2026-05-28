@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Task, Person } from '../types';
 import { X, Trash2, Link2, AlertCircle, Clock, CheckCircle, Calendar } from 'lucide-react';
 import { formatDate, getEndDate, isValidDate } from '../hooks/useGanttCalculations';
@@ -22,6 +23,7 @@ export function TaskModal({
   people,
   allTasks
 }: TaskModalProps) {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [assigneeId, setAssigneeId] = useState<string | null>(null);
   const [startDate, setStartDate] = useState('');
@@ -85,25 +87,31 @@ export function TaskModal({
 
   const availableTasks = allTasks.filter(t => t.id !== task?.id);
 
+  const statusOptions = [
+    { value: 'todo', label: t('task.todo'), icon: AlertCircle },
+    { value: 'in-progress', label: t('task.inProgress'), icon: Clock },
+    { value: 'done', label: t('task.done'), icon: CheckCircle }
+  ];
+
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <h2 className="text-lg font-semibold text-gray-900">
-            {task ? 'Edit Task' : 'Add Task'}
+            {task ? t('task.editTitle') : t('task.addTitle')}
           </h2>
           <div className="flex items-center gap-2">
             {task && (
               <button
                 onClick={() => {
-                  if (confirm('Are you sure you want to delete this task?')) {
+                  if (confirm(t('task.deleteConfirm'))) {
                     onSave({ ...task, id: task.id } as any);
                     onClose();
                   }
                 }}
                 className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-                title="Delete task"
+                title={t('common.delete')}
               >
                 <Trash2 size={18} />
               </button>
@@ -123,13 +131,13 @@ export function TaskModal({
             {/* Task name */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Task Name <span className="text-red-500">*</span>
+                {t('task.taskNameLabel')} <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Design new landing page"
+                placeholder={t('task.taskNamePlaceholder')}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
               />
@@ -147,7 +155,7 @@ export function TaskModal({
                       : 'text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  Quick Add
+                  {t('task.quickAdd')}
                 </button>
                 <button
                   type="button"
@@ -158,7 +166,7 @@ export function TaskModal({
                       : 'text-gray-600 hover:bg-gray-100'
                   }`}
                 >
-                  Detailed
+                  {t('task.detailed')}
                 </button>
               </div>
             )}
@@ -166,14 +174,14 @@ export function TaskModal({
             {/* Assignee */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Assignee
+                {t('task.assigneeLabel')}
               </label>
               <select
                 value={assigneeId || ''}
                 onChange={(e) => setAssigneeId(e.target.value || null)}
                 className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
               >
-                <option value="">Unassigned</option>
+                <option value="">{t('task.unassigned')}</option>
                 {people.map(person => (
                   <option key={person.id} value={person.id}>
                     {person.name} {person.role && `(${person.role})`}
@@ -186,7 +194,7 @@ export function TaskModal({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Start Date
+                  {t('task.startDate')}
                 </label>
                 <input
                   type="date"
@@ -197,7 +205,7 @@ export function TaskModal({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Duration (days)
+                  {t('task.duration')}
                 </label>
                 <input
                   type="number"
@@ -213,14 +221,14 @@ export function TaskModal({
             {isValidDate(startDate) && duration > 0 && (
               <div className="text-sm text-gray-500 flex items-center gap-1.5">
                 <Calendar size={14} />
-                Ends on {formatDate(getEndDate(startDate, duration))}
+                {t('task.endsOn')} {formatDate(getEndDate(startDate, duration))}
               </div>
             )}
 
             {/* Priority */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Priority
+                {t('task.priority')}
               </label>
               <div className="flex gap-2">
                 {(['low', 'medium', 'high'] as const).map(p => (
@@ -238,7 +246,7 @@ export function TaskModal({
                         : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    {p.charAt(0).toUpperCase() + p.slice(1)}
+                    {t(`task.${p}`)}
                   </button>
                 ))}
               </div>
@@ -247,18 +255,14 @@ export function TaskModal({
             {/* Status */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Status
+                {t('task.status')}
               </label>
               <div className="flex gap-2">
-                {([
-                  { value: 'todo', label: 'To Do', icon: AlertCircle },
-                  { value: 'in-progress', label: 'In Progress', icon: Clock },
-                  { value: 'done', label: 'Done', icon: CheckCircle }
-                ] as const).map(({ value, label, icon: Icon }) => (
+                {statusOptions.map(({ value, label, icon: Icon }) => (
                   <button
                     key={value}
                     type="button"
-                    onClick={() => setStatus(value)}
+                    onClick={() => setStatus(value as any)}
                     className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors border-2 flex items-center justify-center gap-1.5 ${
                       status === value
                         ? value === 'done'
@@ -284,12 +288,12 @@ export function TaskModal({
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     <span className="flex items-center gap-1.5">
                       <Link2 size={14} />
-                      Dependencies
+                      {t('task.dependencies')}
                     </span>
                   </label>
                   {availableTasks.length === 0 ? (
                     <p className="text-sm text-gray-400 italic">
-                      No other tasks to depend on
+                      {t('task.noOtherTasks')}
                     </p>
                   ) : (
                     <div className="space-y-2 max-h-32 overflow-y-auto">
@@ -314,12 +318,12 @@ export function TaskModal({
                 {/* Notes */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notes
+                    {t('task.notesLabel')}
                   </label>
                   <textarea
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Additional details, requirements, or context..."
+                    placeholder={t('task.notesPlaceholder')}
                     rows={3}
                     className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   />
@@ -335,14 +339,14 @@ export function TaskModal({
               onClick={onClose}
               className="flex-1 py-2.5 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-100 transition-colors"
             >
-              Cancel
+              {t('common.cancel')}
             </button>
             <button
               type="submit"
               disabled={!name.trim() || !isValidDate(startDate)}
               className="flex-1 py-2.5 bg-[#181d26] text-white rounded-lg font-medium hover:bg-[#0d1218] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {task ? 'Save Changes' : 'Add Task'}
+              {task ? t('task.saveChanges') : t('task.addTask')}
             </button>
           </div>
         </form>

@@ -1,24 +1,27 @@
 "use client";
 
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProject } from '../context/ProjectContext';
 import { ExportModal } from './ExportModal';
 import { ImportModal } from './ImportModal';
 import { Plus, Users, Settings, Download, Upload } from 'lucide-react';
+import { LanguageSelector } from './LanguageSelector';
 
 interface HeaderProps {
   onAddTask: () => void;
   onAddPerson: () => void;
-  onOpenSettings: () => void
+  onOpenSettings: () => void;
 }
 
 export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) {
+  const { t } = useTranslation();
   const { state, dispatch } = useProject();
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isImportOpen, setIsImportOpen] = useState(false);
 
   const handleImport = (data: { people: any[]; tasks: any[] }) => {
-    if (confirm('This will replace all current data. Continue?')) {
+    if (confirm(t('import.replaceConfirm'))) {
       dispatch({
         type: 'LOAD_STATE',
         payload: {
@@ -27,6 +30,13 @@ export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) 
           projectStartDate: new Date().toISOString().split('T')[0]
         }
       });
+    }
+  };
+
+  const handleClearData = () => {
+    if (confirm(t('alerts.clearDataConfirm'))) {
+      localStorage.removeItem('project-planner-state');
+      window.location.reload();
     }
   };
 
@@ -52,7 +62,7 @@ export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) 
               </svg>
             </div>
             <h1 className="text-lg font-semibold text-gray-900">
-              Project Planner
+              {t('header.title')}
             </h1>
           </div>
           
@@ -60,27 +70,29 @@ export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) 
           <div className="hidden md:flex items-center gap-4 ml-6 pl-6 border-l border-gray-200">
             <div className="text-center">
               <div className="text-lg font-semibold text-gray-900">{state.tasks.length}</div>
-              <div className="text-xs text-gray-500">Tasks</div>
+              <div className="text-xs text-gray-500">{t('header.tasks')}</div>
             </div>
             <div className="text-center">
               <div className="text-lg font-semibold text-gray-900">{state.people.length}</div>
-              <div className="text-xs text-gray-500">Team</div>
+              <div className="text-xs text-gray-500">{t('header.team')}</div>
             </div>
             <div className="text-center">
               <div className="text-lg font-semibold text-green-600">
                 {state.tasks.filter(t => t.status === 'done').length}
               </div>
-              <div className="text-xs text-gray-500">Done</div>
+              <div className="text-xs text-gray-500">{t('header.done')}</div>
             </div>
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex items-center gap-3">
+          <LanguageSelector />
+
           <button
             onClick={onOpenSettings}
             className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            title="Settings"
+            title={t('header.settings')}
           >
             <Settings size={18} />
           </button>
@@ -90,7 +102,7 @@ export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) 
             className="hidden sm:flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
           >
             <Users size={16} />
-            Add Person
+            {t('header.addPerson')}
           </button>
           
           <button
@@ -98,7 +110,7 @@ export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) 
             className="flex items-center gap-2 px-4 py-2 bg-[#181d26] text-white rounded-lg font-medium text-sm hover:bg-[#0d1218] transition-colors"
           >
             <Plus size={16} />
-            Add Task
+            {t('header.addTask')}
           </button>
 
           <button
@@ -106,7 +118,7 @@ export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) 
             className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
           >
             <Upload size={16} />
-            Import
+            {t('header.import')}
           </button>
 
           <button
@@ -114,18 +126,13 @@ export function Header({ onAddTask, onAddPerson, onOpenSettings }: HeaderProps) 
             className="flex items-center gap-2 px-3 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
           >
             <Download size={16} />
-            Export
+            {t('header.export')}
           </button>
 
           <button
-            onClick={() => {
-              if (confirm('Clear all data? This cannot be undone.')) {
-                localStorage.removeItem('project-planner-state');
-                window.location.reload();
-              }
-            }}
+            onClick={handleClearData}
             className="p-2 text-gray-400 hover:text-red-500 transition-colors"
-            title="Clear all data"
+            title={t('header.clearData')}
           >
             <svg
               className="w-5 h-5"

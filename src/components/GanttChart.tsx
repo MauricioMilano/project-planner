@@ -1,4 +1,5 @@
 import React, { useRef, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useProject } from '../context/ProjectContext';
 import { GanttHeader } from './GanttHeader';
 import { GanttRow } from './GanttRow';
@@ -70,6 +71,7 @@ function SortableTaskRow({ task, index, projectStartDate, dayWidth, onTaskClick,
 }
 
 export function GanttChart() {
+  const { t } = useTranslation();
   const { state, updateTask, addTask, reorderTasks } = useProject();
   const settings = useSettings();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -105,7 +107,7 @@ export function GanttChart() {
       };
     }
 
-    const dates = state.tasks.flatMap(t => [t.startDate, addDays(t.startDate, t.duration)]);
+    const dates = state.tasks.flatMap(task => [task.startDate, addDays(task.startDate, task.duration)]);
     const minDate = dates.reduce((min, d) => d < min ? d : min);
     const maxDate = dates.reduce((max, d) => d > max ? d : max);
     
@@ -165,8 +167,8 @@ export function GanttChart() {
     const { active, over } = event;
     
     if (over && active.id !== over.id) {
-      const oldIndex = state.tasks.findIndex(t => t.id === active.id);
-      const newIndex = state.tasks.findIndex(t => t.id === over.id);
+      const oldIndex = state.tasks.findIndex(task => task.id === active.id);
+      const newIndex = state.tasks.findIndex(task => task.id === over.id);
       
       if (oldIndex !== -1 && newIndex !== -1) {
         reorderTasks(oldIndex, newIndex);
@@ -193,12 +195,12 @@ export function GanttChart() {
         {/* Toolbar */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
           <div className="flex items-center gap-2">
-            <h2 className="text-sm font-medium text-gray-700">Timeline</h2>
+            <h2 className="text-sm font-medium text-gray-700">{t('gantt.title')}</h2>
             <span className="text-xs text-gray-400">
-              {state.tasks.length} task{state.tasks.length !== 1 ? 's' : ''}
+              {state.tasks.length} {state.tasks.length !== 1 ? t('export.taskCount') : t('task.taskNameLabel').toLowerCase()}
             </span>
             <span className="text-xs text-gray-400 ml-2">
-              Drag tasks to reorder
+              {t('gantt.dragToReorder')}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -206,7 +208,7 @@ export function GanttChart() {
               onClick={scrollToToday}
               className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors"
             >
-              Today
+              {t('gantt.today')}
             </button>
             <button
               onClick={() => scrollRef.current && (scrollRef.current.scrollLeft -= 200)}
@@ -225,7 +227,7 @@ export function GanttChart() {
               className="flex items-center gap-1.5 px-3 py-1.5 bg-[#181d26] text-white text-sm font-medium rounded-lg hover:bg-[#0d1218] transition-colors"
             >
               <Plus size={14} />
-              Add Task
+              {t('header.addTask')}
             </button>
           </div>
         </div>
@@ -237,17 +239,17 @@ export function GanttChart() {
             {/* Task name column header */}
             <div className="h-12 flex items-center px-3 border-b border-gray-200 bg-gray-50">
               <GripVertical size={14} className="text-gray-400 mr-2" />
-              <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">Task</span>
+              <span className="text-xs font-semibold text-gray-600 uppercase tracking-wide">{t('gantt.task')}</span>
             </div>
             {/* Task rows */}
             <div className="flex-1 overflow-y-auto">
               {state.tasks.length === 0 ? (
                 <div className="h-20 flex items-center justify-center">
-                  <span className="text-xs text-gray-400">No tasks</span>
+                  <span className="text-xs text-gray-400">{t('gantt.noTasks')}</span>
                 </div>
               ) : (
                 <SortableContext
-                  items={state.tasks.map(t => t.id)}
+                  items={state.tasks.map(task => task.id)}
                   strategy={verticalListSortingStrategy}
                 >
                   {state.tasks.map((task, index) => (
@@ -313,9 +315,9 @@ export function GanttChart() {
                           />
                         </svg>
                       </div>
-                      <p className="text-sm text-gray-500 mb-1">No tasks yet</p>
+                      <p className="text-sm text-gray-500 mb-1">{t('gantt.noTasks')}</p>
                       <p className="text-xs text-gray-400 mb-4">
-                        Click on the timeline or use the button above to add tasks
+                        {t('gantt.noTasksHint')}
                       </p>
                       <button
                         onClick={(e) => {
@@ -325,7 +327,7 @@ export function GanttChart() {
                         className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#181d26] text-white text-sm font-medium rounded-lg hover:bg-[#0d1218] transition-colors"
                       >
                         <Plus size={14} />
-                        Add First Task
+                        {t('gantt.addFirstTask')}
                       </button>
                     </div>
                   </div>
